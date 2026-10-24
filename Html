@@ -1,1 +1,107 @@
-Html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Students IS Education Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Cairo:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+<h1 data-en="🎓 Students IS Education Platform" data-ar="🎓 منصة Students IS التعليمية">🎓 Students IS Education Platform</h1>
+<p data-en="Al-Bayan University" data-ar="جامعة البيان">Al-Bayan University</p>
+<p data-en="College of Computer Science" data-ar="كلية علوم الحاسوب">College of Computer Science</p>
+<p data-en="Information Systems" data-ar="نظم المعلومات">Information Systems</p>
+</header>
+<nav>
+<button id="navHome" data-en="🏠 Home" data-ar="🏠 الرئيسية">🏠 Home</button>
+<button id="navTasks" data-en="📝 Tasks" data-ar="📝 مهامي">📝 Tasks</button>
+<button id="navAbout" data-en="ℹ️ About" data-ar="ℹ️ حول المنصة">ℹ️ About</button>
+<button id="navDark"> Dark mode🌙</button>
+<button id="navLang">عربي</button>
+</nav>
+<div class="search">
+<input id="searchInput" type="text" placeholder="🔎 Search..." data-en="🔎 Search for a subject..." data-ar="🔎 ابحث عن مادة أو ملف..." data-ph="1">
+</div>
+
+<section id="homePage" class="page">
+<div class="container">
+<div class="title"><h2 data-en="📚 Academic Subjects" data-ar="📚 المواد الدراسية">📚 Academic Subjects</h2></div>
+<div class="term-switch">
+<button id="termT1Btn" class="term-btn" data-en="📘 Term 1" data-ar="📘 الفصل الأول">📘 الفصل الأول</button>
+<button id="termT2Btn" class="term-btn" data-en="📗 Term 2 (New)" data-ar="📗 الفصل الثاني (جديد)">📗 الفصل الثاني (جديد)</button>
+</div>
+<div class="counter" id="counter"></div>
+<div class="subjects" id="subjectList"></div>
+</div>
+</section>
+
+<section id="tasksPage" class="page">
+<div class="container">
+<div class="title"><h2 data-en="📝 My Study Tasks" data-ar="📝 مهام مذاكرتي">📝 My Study Tasks</h2></div>
+<div class="task-add">
+<input type="text" id="taskInput" data-en="Write a new task..." data-ar="اكتب مهمة جديدة..." data-ph="1" placeholder="Write a new task...">
+<button id="addTaskBtn" data-en="➕ Add" data-ar="➕ إضافة">➕ Add</button>
+</div>
+<ul id="taskList" class="task-list"></ul>
+<p class="empty" id="taskEmpty" data-en="No tasks yet. Add your first one above 👆" data-ar="لا توجد مهام بعد. أضف أول مهمة من الأعلى 👆">No tasks yet. Add your first one above 👆</p>
+</div>
+</section>
+
+<section id="subjectPage" class="page">
+<div class="container">
+<button class="back" id="backHome" data-en="← Back" data-ar="→ رجوع">← Back</button>
+<div class="subject-title"><h2 id="subjectName"></h2></div>
+
+<div class="exam-card">
+<span id="examText" data-en="⏳ No exam date set" data-ar="⏳ لم يُحدد موعد امتحان">⏳ No exam date set</span>
+<input type="date" id="examDate">
+<button id="examSaveBtn" data-en="Save" data-ar="حفظ">Save</button>
+<button id="examClearBtn" data-en="Clear" data-ar="مسح">Clear</button>
+</div>
+
+<div class="materials" id="materialList"></div>
+</div>
+</section>
+
+<section id="materialsPage" class="page">
+<div class="container">
+<button class="back" id="backSubject" data-en="← Back" data-ar="→ رجوع">← Back</button>
+<div class="subject-title"><h2 id="materialTitle"></h2></div>
+
+<div class="upload-card" id="uploadCardSection">
+<h3 data-en="📤 Upload a File (reviewed before publishing)" data-ar="📤 رفع ملف (يُنشر بعد المراجعة)">📤 Upload a File (reviewed before publishing)</h3>
+<input type="file" id="uploadInput" accept="application/pdf,.doc,.docx,.ppt,.pptx,image/*">
+<button id="uploadBtn" data-en="Upload" data-ar="رفع">Upload</button>
+<div class="msg" id="uploadMsg"></div>
+</div>
+
+<input type="text" id="fileSearchInput" class="file-search" data-en="🔎 Search files in this section..." data-ar="🔎 ابحث في هذا القسم..." data-ph="1" placeholder="🔎 Search files in this section...">
+<div id="fileList" class="file-list"></div>
+</div>
+</section>
+
+<section id="aboutPage" class="page">
+<div class="container"><div class="about">
+<h2 data-en="ℹ️ About the Platform" data-ar="ℹ️ حول المنصة">ℹ️ About the Platform</h2><br>
+<p data-en="An educational platform for organizing university courses, sheets, lectures, exams and PDF files." data-ar="منصة تعليمية لتنظيم المواد الجامعية والشيتات والمحاضرات والامتحانات وملفات PDF.">An educational platform for organizing university courses, sheets, lectures, exams and PDF files.</p><br>
+<p>🎓 Al-Bayan University<br>💻 College of Computer Science<br>🖥️ Information Systems</p>
+</div></div>
+</section>
+
+<footer>
+<p id="footerLogo" style="cursor:default;user-select:none;">🎓 Students IS Education Platform</p>
+<p data-en="Designed by: Abdullah Ismail (ba7294630@gmail.com)" data-ar="تصميم: عبدالله إسماعيل (ba7294630@gmail.com)">Designed by: Abdullah Ismail (ba7294630@gmail.com)</p>
+  <p>تصميم:مرتضى عيسى  <p>
+<p class="contact">👤 Murtda eissa &nbsp;|&nbsp; 📞 0998359296 &nbsp;|&nbsp; ✉️ Murtdaeissa90@gmail.com</p>
+<p>© 2026 All Rights Reserved</p>
+<a id="adminLink" href="admin.html" style="display:none;margin-top:10px;color:#9ec8ff;font-size:13px;">🔑 Admin</a>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="script.js"></script>
+</body>
+</html>
