@@ -1,1 +1,1032 @@
-java
+/* ===== Settings: Supabase Storage ===== */
+const STORAGE_URL = "https://jetxkhyvcxuxvheastlr.supabase.co";
+const STORAGE_KEY = "sb_publishable_ubU3voY3OYZr10bVmyB6HA_07Djetpw";
+const BUCKET = "Twix";
+
+/* [display name, icon, folder name inside the bucket] */
+const SUBJECTS = [
+ ["Accounting I","📊","Accounting","T1"],["Arabic Language II","📖","Arabic","T1"],["Calculus","📐","Calculus","T1"],
+ ["Computer Applications for Business","💻","ComputerApplications","T1"],["English Language II","🌎","English","T1"],
+ ["Fundamentals of Information Systems","🖥️","Fundamental of information systems","T1"],["Islamic Studies II","📚","IslamicStudies","T1"],
+ ["Managing People","👥","ManagingPeople","T1"],["Programming Methods I","💻","Programming","T1"],["Sudanese Studies","🇸🇩","SudaneseStudies","T1"],
+ ["Business Communication","💬","BusinessCommunication","T2"],["Programming Methods II","💻","ProgrammingMethodsII","T2"],
+ ["Accounting II","📊","AccountingII","T2"],["Internet Programming","🌐","InternetProgramming","T2"],
+ ["Principles of Finance","💰","PrinciplesOfFinance","T2"],["Probability & Statistics","📉","ProbabilityStatistics","T2"],
+ ["English Language III","🌎","EnglishLanguageIII","T2"]
+];
+
+/* [folder/key, icon, English label, Arabic label] */
+const MATERIALS = [
+ ["Lectures","📚","Course Lectures","المحاضرات"],
+ ["Exams","📝","Practice Exams","الامتحانات"],
+ ["Questions","❓","Review Questions (MCQ)","أسئلة الاختيار المتعدد (١٠ أسئلة)"]
+];
+
+/* ===== قاعدة بيانات الأسئلة ثنائية اللغة (عربي / إنجليزي) ===== */
+const QUESTIONS_DATA = {
+ "Accounting I": [
+  {
+   q: { ar: "المعادلة المحاسبية الأساسية هي:", en: "The basic accounting equation is:" },
+   options: { ar: ["الأصول = الخصوم + حقوق الملكية", "الأصول = الإيرادات - المصروفات", "الخصوم = الأصول + رأس المال", "صافي الدخل = الأصول - الخصوم"], en: ["Assets = Liabilities + Equity", "Assets = Revenues - Expenses", "Liabilities = Assets + Capital", "Net Income = Assets - Liabilities"] },
+   correct: 0
+  },
+  {
+   q: { ar: "طبيعة حساب الأصول هي:", en: "The normal balance of asset accounts is:" },
+   options: { ar: ["دائن", "مدين", "محايد", "إيراد"], en: ["Credit", "Debit", "Neutral", "Revenue"] },
+   correct: 1
+  },
+  {
+   q: { ar: "طبيعة حساب الخصوم وحقوق الملكية هي:", en: "The normal balance of liabilities and equity is:" },
+   options: { ar: ["مدين", "دائن", "مصروف", "مسحوبات"], en: ["Debit", "Credit", "Expense", "Drawings"] },
+   correct: 1
+  },
+  {
+   q: { ar: "دفتر الأستاذ يُستخدم في:", en: "The general ledger is used for:" },
+   options: { ar: ["تسجيل العمليات فور وقوعها تاريخياً", "تبويب وترحيل العمليات لكل حساب على حدة", "حساب عدد الموظفين في الشركة", "كتابة العقود القانونية"], en: ["Recording transactions chronologically", "Posting and classifying transactions into individual accounts", "Counting employees", "Writing legal contracts"] },
+   correct: 1
+  },
+  {
+   q: { ar: "ميزان المراجعة يُعد بهدف:", en: "The trial balance is prepared to:" },
+   options: { ar: ["حساب الأرباح والخسائر فقط", "التأكد من تساوي مجموع الأرصدة المدينة والدائنة", "تقييم أداء الموظفين", "تحديد الضرائب المستحقة"], en: ["Calculate profit and loss only", "Ensure total debit and credit balances are equal", "Evaluate performance", "Determine taxes"] },
+   correct: 1
+  },
+  {
+   q: { ar: "أساس المحاسبة الذي يعترف بالإيرادات عند تحصيلها نقداً هو:", en: "The accounting basis that recognizes revenues when cash is received is:" },
+   options: { ar: ["أساس الاستحقاق", "الأساس النقدي", "الأساس التاريخي", "أساس المقابلة"], en: ["Accrual basis", "Cash basis", "Historical cost basis", "Matching principle"] },
+   correct: 1
+  },
+  {
+   q: { ar: "قائمة الدخل تعرض:", en: "The income statement shows:" },
+   options: { ar: ["الأصول والخصوم في لحظة معينة", "الإيرادات والمصروفات ونتيجة النشاط من ربح أو خسارة", "حركة النقدية الداخلة والخارجة فقط", "أسماء الشركاء وحصصهم"], en: ["Assets and liabilities at a specific point", "Revenues, expenses, and net income or loss", "Cash inflows and outflows only", "Partners' names and shares"] },
+   correct: 1
+  },
+  {
+   q: { ar: "قائمة المركز المالي (الميزانية) تحتوي على:", en: "The balance sheet contains:" },
+   options: { ar: ["الإيرادات والمصروفات", "الأصول والخصوم وحقوق الملكية", "التدفقات النقدية التشغيلية", "الأجور والرواتب"], en: ["Revenues and expenses", "Assets, liabilities, and equity", "Operating cash flows", "Wages and salaries"] },
+   correct: 1
+  },
+  {
+   q: { ar: "المصروفات بطبيعتها:", en: "Expenses naturally have a:" },
+   options: { ar: ["دائنة", "مدينة", "ليس لها طبيعة", "أصول ثابتة"], en: ["Credit balance", "Debit balance", "No nature", "Fixed asset status"] },
+   correct: 1
+  },
+  {
+   q: { ar: "الإيرادات بطبيعتها:", en: "Revenues naturally have a:" },
+   options: { ar: ["مدينة", "دائنة", "التزامات", "مصروفات"], en: ["Debit balance", "Credit balance", "Liability status", "Expense status"] },
+   correct: 1
+  }
+ ],
+ "Arabic Language II": [
+  {
+   q: { ar: "الأفعال الخمسة تُرفع بـ:", en: "The five verbs are nominative with:" },
+   options: { ar: ["الضمة الظاهرة", "ثبوت النون", "حذف النون", "الواو"], en: ["Visible Damma", "Thubut An-Nun", "Dropping An-Nun", "Waw"] },
+   correct: 1
+  },
+  {
+   q: { ar: "الممنوع من الصرف يُجر بـ:", en: "Diptotes are genitive with:" },
+   options: { ar: ["الكسرة الظاهرة", "الفتحة نيابة عن الكسرة", "الياء دائماً", "السكون"], en: ["Visible Kasra", "Fatha in place of Kasra", "Ya always", "Sukoen"] },
+   correct: 1
+  },
+  {
+   q: { ar: "الفعل اللازم هو الذي:", en: "The intransitive verb is one that:" },
+   options: { ar: ["ينصب مفعولين", "يكتفي بفاعله ولا يحتاج لمفعول به", "يتعدى لمفعول به واحد", "لا يأتي إلا في الماضي"], en: ["Takes two objects", "Suffices with its subject and needs no object", "Takes one object", "Only occurs in past tense"] },
+   correct: 1
+  },
+  {
+   q: { ar: "الحال في جملة (جاء الطالب متبسماً) هو:", en: "The Hal in 'The student came smiling' is:" },
+   options: { ar: ["فاعل", "حال منصوب وعلامة نصبه الفتحة", "مفعول به", "نعت مرفوع"], en: ["Subject", "Hal accusative with Fatha", "Object", "Adjective"] },
+   correct: 1
+  },
+  {
+   q: { ar: "المفعول المطلق هو:", en: "Al-Maf'ul Al-Mutlaq is:" },
+   options: { ar: ["اسم منصوب يؤكد الفعل أو يبين نوعه أو عدده", "اسم مرفوع يدل على وقت الفعل", "مجرور بحرف جر", "صفة للموصوف"], en: ["An accusative noun emphasizing or explaining the verb", "A nominative noun showing time", "Genitive with preposition", "An adjective"] },
+   correct: 0
+  },
+  {
+   q: { ar: "التوكيد المعنوي يكون بألفاظ مثل:", en: "Moral emphasis uses words like:" },
+   options: { ar: ["ذهب، كتب، قرأ", "نفس، عين، كل، جميع", "من، عن، في", "هذا، هذه، هؤلاء"], en: ["Went, wrote, read", "Nafs, 'Ayn, Kull, Jami'", "Min, 'An, Fi", "Hatha, Hathihi, Ha'ula'"] },
+   correct: 1
+  },
+  {
+   q: { ar: "همزة القطع تُكتب:", en: "Hamzat Al-Qat' is written:" },
+   options: { ar: ["في أول الكرسي فقط", "فوق الألف أو تحتها وتُنطق في كل حال", "بدون ألف نهائياً", "في آخر الكلمة فقط"], en: ["At the start of the chair only", "Above or below the Alif and pronounced always", "Without Alif completely", "At the end only"] },
+   correct: 1
+  },
+  {
+   q: { ar: "المستثنى بـ (إلا) في الكلام التام الموجب يكون:", en: "The exception with (Illa) in a complete positive sentence is:" },
+   options: { ar: ["واجب النصب", "جوازاً بدلاً", "مجروراً دائماً", "مرفوعاً دائماً"], en: ["Mandatory accusative", "Optional substitute", "Always genitive", "Always nominative"] },
+   correct: 0
+  },
+  {
+   q: { ar: "الحرف الذي يفيد النفي من الحروف الآتية هو:", en: "Which of the following letters indicates negation?" },
+   options: { ar: ["هل", "لم", "يا", "إنْ الشرطية"], en: ["Hal", "Lam", "Ya", "In conditional"] },
+   correct: 1
+  },
+  {
+   q: { ar: "إعراب الفعل المضارع المسبوق بحرف نصب (مثل: لن يكسلَ الطالبُ):", en: "The parsing of a present verb preceded by a nasal particle:" },
+   options: { ar: ["مجزوم بالسكون", "منصوب بالفتحة الظاهرة", "مرفوع بالضمة", "مبني على الفتح"], en: ["Jazm with Sukoon", "Nasb with visible Fatha", "Raf' with Damma", "Built on Fatha"] },
+   correct: 1
+  }
+ ],
+ "Calculus": [
+  {
+   q: { ar: "مشتقة الدالة الثابتة c تساوي:", en: "The derivative of a constant function c is:" },
+   options: { ar: ["c نفسها", "صفر", "1", "x"], en: ["c itself", "Zero", "1", "x"] },
+   correct: 1
+  },
+  {
+   q: { ar: "مشتقة x^3 هي:", en: "The derivative of x^3 is:" },
+   options: { ar: ["3x^2", "x^2", "3x^3", "6x"], en: ["3x^2", "x^2", "3x^3", "6x"] },
+   correct: 0
+  },
+  {
+   q: { ar: "مشتقة sin(x) هي:", en: "The derivative of sin(x) is:" },
+   options: { ar: ["-sin(x)", "cos(x)", "-cos(x)", "tan(x)"], en: ["-sin(x)", "cos(x)", "-cos(x)", "tan(x)"] },
+   correct: 1
+  },
+  {
+   q: { ar: "قاعدة السلسلة (Chain Rule) تُستخدم لـ:", en: "The Chain Rule is used for:" },
+   options: { ar: ["تكامل الدوال البسيطة", "اشتقاق الدوال المركبة", "إيجاد النهايات", "حساب المساحات"], en: ["Integrating simple functions", "Differentiating composite functions", "Finding limits", "Calculating areas"] },
+   correct: 1
+  },
+  {
+   q: { ar: "التكامل غير المحدود لـ x^2 dx هو:", en: "The indefinite integral of x^2 dx is:" },
+   options: { ar: ["2x + C", "(x^3)/3 + C", "x^3 + C", "3x^3 + C"], en: ["2x + C", "(x^3)/3 + C", "x^3 + C", "3x^3 + C"] },
+   correct: 1
+  },
+  {
+   q: { ar: "التفسير الهندسي للمشتقة الأولى هو:", en: "The geometric interpretation of the first derivative is:" },
+   options: { ar: ["المساحة تحت المنحنى", "ميل المماس لمنحنى الدالة عند نقطة", "نقطة التقاطع مع محور الصادات", "حجم المجسم الدوراني"], en: ["Area under the curve", "Slope of the tangent line to the curve at a point", "Y-intercept", "Solid volume"] },
+   correct: 1
+  },
+  {
+   q: { ar: "النقطة الحرجة للدالة تُوجد عندما تكون المشتقة الأولى:", en: "A critical point of a function occurs when the first derivative is:" },
+   options: { ar: ["مساوية للصفر أو غير معرفة", "موجبة دائماً", "سالبة دائماً", "تساوي واحد"], en: ["Zero or undefined", "Always positive", "Always negative", "Equal to one"] },
+   correct: 0
+  },
+  {
+   q: { ar: "مشتقة e^x هي:", en: "The derivative of e^x is:" },
+   options: { ar: ["x * e^(x-1)", "e^x نفسها", "ln(x)", "1/x"], en: ["x * e^(x-1)", "e^x itself", "ln(x)", "1/x"] },
+   correct: 1
+  },
+  {
+   q: { ar: "تكامل 1/x dx يساوي:", en: "The integral of 1/x dx is:" },
+   options: { ar: ["-1/x^2 + C", "ln|x| + C", "e^x + C", "x^2 + C"], en: ["-1/x^2 + C", "ln|x| + C", "e^x + C", "x^2 + C"] },
+   correct: 1
+  },
+  {
+   q: { ar: "اختبار المشتقة الثانية يُستخدم لمعرفة:", en: "The second derivative test is used to find:" },
+   options: { ar: ["التقعتر والنقاط العظمى والصغرى المحلية", "مشتقة الدوال المثلثية العكسية", "نهاية الدالة عند ما لا نهاية", "طول منحنى الدالة"], en: ["Concavity and local extrema", "Inverse trig derivatives", "Limit at infinity", "Arc length"] },
+   correct: 0
+  }
+ ],
+ "Computer Applications for Business": [
+  {
+   q: { ar: "الدالة المستخدمة لإيجاد المجموع في Excel هي:", en: "The function used to find the sum in Excel is:" },
+   options: { ar: ["AVERAGE", "SUM", "COUNT", "MAX"], en: ["AVERAGE", "SUM", "COUNT", "MAX"] },
+   correct: 1
+  },
+  {
+   q: { ar: "المرجع الذي يثبت الصف أو العمود باستخدام علامة الدولار ($) يسمى:", en: "A reference that locks a row or column using a dollar sign ($) is called:" },
+   options: { ar: ["مرجع نسبي", "مرجع مطلق", "مرجع دائري", "مرجع تلقائي"], en: ["Relative reference", "Absolute reference", "Circular reference", "Auto reference"] },
+   correct: 1
+  },
+  {
+   q: { ar: "الدالة الشرطية في إكسل هي:", en: "The conditional function in Excel is:" },
+   options: { ar: ["SUMIF", "IF", "VLOOKUP", "COUNT"], en: ["SUMIF", "IF", "VLOOKUP", "COUNT"] },
+   correct: 1
+  },
+  {
+   q: { ar: "وظيفة دالة VLOOKUP هي:", en: "The function of VLOOKUP is:" },
+   options: { ar: ["حساب المعدل", "البحث عن قيمة رأسياً في عمود وإرجاع قيمة مقابلة", "دمج النصوص", "حساب الجذر التربيعي"], en: ["Calculate average", "Search vertically in a column and return a corresponding value", "Concatenate text", "Calculate square root"] },
+   correct: 1
+  },
+  {
+   q: { ar: "الفرق بين COUNT و COUNTA أن COUNT تعد:", en: "The difference between COUNT and COUNTA is that COUNT counts:" },
+   options: { ar: ["الخلايا النصية فقط", "الخلايا الرقمية فقط", "جميع الخلايا الفارغة", "الخلايا الملونة فقط"], en: ["Text cells only", "Numeric cells only", "All blank cells", "Colored cells only"] },
+   correct: 1
+  },
+  {
+   q: { ar: "لفرز وترتيب البيانات في جداول إكسل نستخدم أداة:", en: "To sort and arrange data in Excel tables, we use:" },
+   options: { ar: ["Filter & Sort", "Chart", "Formula", "Protect Sheet"], en: ["Filter & Sort", "Chart", "Formula", "Protect Sheet"] },
+   correct: 0
+  },
+  {
+   q: { ar: "ملف إكسل يسمى عادة بـ:", en: "An Excel file is commonly called a:" },
+   options: { ar: ["ورقة عمل (Worksheet)", "مصنف (Workbook)", "قاعدة بيانات (Database)", "مستند (Document)"], en: ["Worksheet", "Workbook", "Database", "Document"] },
+   correct: 1
+  },
+  {
+   q: { ar: "الرمز الذي يبدأ به أي معادلة أو دالة في إكسل هو:", en: "The symbol that starts any formula or function in Excel is:" },
+   options: { ar: ["#", "=", "+", "@"], en: ["#", "=", "+", "@"] },
+   correct: 1
+  },
+  {
+   q: { ar: "الدالة المسؤولة عن إيجاد أعلى قيمة في نطاق خلايا هي:", en: "The function responsible for finding the highest value in a range is:" },
+   options: { ar: ["MIN", "MAX", "AVERAGE", "SUM"], en: ["MIN", "MAX", "AVERAGE", "SUM"] },
+   correct: 1
+  },
+  {
+   q: { ar: "لحماية ورقة العمل من التعديل غير المسموح به نستخدم:", en: "To protect a worksheet from unauthorized modification, we use:" },
+   options: { ar: ["Format Cells", "Protect Sheet", "Conditional Formatting", "Data Validation"], en: ["Format Cells", "Protect Sheet", "Conditional Formatting", "Data Validation"] },
+   correct: 1
+  }
+ ],
+ "English Language II": [
+  {
+   q: { ar: "Present Simple tense is used for:", en: "Present Simple tense is used for:" },
+   options: { ar: ["Actions happening right now", "Habits and general truths", "Completed past actions", "Future plans only"], en: ["Actions happening right now", "Habits and general truths", "Completed past actions", "Future plans only"] },
+   correct: 1
+  },
+  {
+   q: { ar: "The past simple form of the irregular verb \"go\" is:", en: "The past simple form of the irregular verb \"go\" is:" },
+   options: { ar: ["goed", "going", "went", "gone"], en: ["goed", "going", "went", "gone"] },
+   correct: 2
+  },
+  {
+   q: { ar: "Which of the following is a modal verb?", en: "Which of the following is a modal verb?" },
+   options: { ar: ["Run", "Must", "Table", "Beautiful"], en: ["Run", "Must", "Table", "Beautiful"] },
+   correct: 1
+  },
+  {
+   q: { ar: "We use \"going to\" for:", en: "We use \"going to\" for:" },
+   options: { ar: ["Instant decisions made now", "Pre-planned intentions and future predictions based on evidence", "Past habits", "Conditional clauses"], en: ["Instant decisions made now", "Pre-planned intentions and future predictions based on evidence", "Past habits", "Conditional clauses"] },
+   correct: 1
+  },
+  {
+   q: { ar: "Uncountable nouns:", en: "Uncountable nouns:" },
+   options: { ar: ["Can be counted with numbers like 1, 2, 3", "Do not have plural forms (e.g., water, advice)", "Always take plural verbs", "Use \"an\" before them"], en: ["Can be counted with numbers like 1, 2, 3", "Do not have plural forms (e.g., water, advice)", "Always take plural verbs", "Use \"an\" before them"] },
+   correct: 1
+  },
+  {
+   q: { ar: "The superlative form of \"tall\" is:", en: "The superlative form of \"tall\" is:" },
+   options: { ar: ["taller", "the tallest", "more tall", "tallest than"], en: ["taller", "the tallest", "more tall", "tallest than"] },
+   correct: 1
+  },
+  {
+   q: { ar: "Relative pronouns include words like:", en: "Relative pronouns include words like:" },
+   options: { ar: ["and, but, because", "who, which, that", "in, on, at", "he, she, they"], en: ["and, but, because", "who, which, that", "in, on, at", "he, she, they"] },
+   correct: 1
+  },
+  {
+   q: { ar: "In the passive voice, the focus is on:", en: "In the passive voice, the focus is on:" },
+   options: { ar: ["The person doing the action", "The action or the receiver of the action", "The time of the event", "The speaker's opinion"], en: ["The person doing the action", "The action or the receiver of the action", "The time of the event", "The speaker's opinion"] },
+   correct: 1
+  },
+  {
+   q: { ar: "Present Perfect tense is formed using:", en: "Present Perfect tense is formed using:" },
+   options: { ar: ["have/has + past participle (V3)", "did + base verb", "is/are + V-ing", "had + V3"], en: ["have/has + past participle (V3)", "did + base verb", "is/are + V-ing", "had + V3"] },
+   correct: 0
+  },
+  {
+   q: { ar: "A word used to show contrast or link ideas is:", en: "A word used to show contrast or link ideas is:" },
+   options: { ar: ["However", "Table", "Chair", "Quickly"], en: ["However", "Table", "Chair", "Quickly"] },
+   correct: 0
+  }
+ ],
+ "Fundamentals of Information Systems": [
+  {
+   q: { ar: "المكونات الخمسة الأساسية لنظم المعلومات هي:", en: "The five core components of information systems are:" },
+   options: { ar: ["الأجهزة، البرمجيات، البيانات، الإجراءات، العنصر البشري", "الشاشات، الطابعات، الأسلاك، الماوس، لوحة المفاتيح", "الإنترنت، الشبكة، الراوتر، السيرفر، الحوسبة", "الإدارة، المال، الموظفون، الأرباح، الأسواق"], en: ["Hardware, software, data, procedures, people", "Screens, printers, cables, mouse, keyboard", "Internet, network, router, server, computing", "Management, money, employees, profits, markets"] },
+   correct: 0
+  },
+  {
+   q: { ar: "الفرق بين البيانات والمعلومات أن البيانات هي:", en: "The difference between data and information is that data is:" },
+   options: { ar: ["حقائق خام ومواد أولية لم تتم معالجتها", "نتائج نهائية جاهزة لاتخاذ القرار", "تقارير إدارية ملخصة", "برمجيات تشغيل الحاسب"], en: ["Raw facts and unpolished materials", "Final results ready for decision making", "Summarized management reports", "Computer operating software"] },
+   correct: 0
+  },
+  {
+   q: { ar: "نظم دعم القرار (DSS) تُستخدم أساساً لـ:", en: "Decision Support Systems (DSS) are mainly used to:" },
+   options: { ar: ["تسجيل العمليات اليومية الروتينية", "مساعدة الإدارة في اتخاذ قرارات شبه مهيكلة وغير مهيكلة", "طباعة الفواتير للموظفين", "حماية الشبكة من الفيروسات"], en: ["Record routine daily operations", "Help management make semi-structured and unstructured decisions", "Print employee invoices", "Protect the network from viruses"] },
+   correct: 1
+  },
+  {
+   q: { ar: "مرحلة البداية في دورة حياة تطوير النظم (SDLC) هي:", en: "The initial phase in the System Development Life Cycle (SDLC) is:" },
+   options: { ar: ["التخطيط (Planning)", "البرمجة الفورية", "الصيانة", "التسويق"], en: ["Planning", "Instant programming", "Maintenance", "Marketing"] },
+   correct: 0
+  },
+  {
+   q: { ar: "حماية البيانات من السرقة والتلف وضمان سريتها يُعرف بـ:", en: "Protecting data from theft and damage and ensuring confidentiality is known as:" },
+   options: { ar: ["أمن المعلومات (Information Security)", "قواعد البيانات العلائقية", "التجارة الإلكترونية", "الحوسبة السحابية"], en: ["Information Security", "Relational databases", "E-commerce", "Cloud computing"] },
+   correct: 0
+  },
+  {
+   q: { ar: "قاعدة البيانات تتميز عن الملفات التقليدية بـ:", en: "A database differs from traditional files by:" },
+   options: { ar: ["تقليل تكرار البيانات وتكاملها", "زيادة حجم الملفات بلا داعي", "صعوبة الاسترجاع", "عدم توفير صلاحيات أمان"], en: ["Reducing data redundancy and integrity", "Unnecessarily increasing file size", "Difficulty in retrieval", "Lacking security permissions"] },
+   correct: 0
+  },
+  {
+   q: { ar: "نموذج تقديم خدمات الحوسبة والتخزين عبر الإنترنت حسب الطلب يسمى:", en: "The model of providing computing and storage services over the internet on-demand is called:" },
+   options: { ar: ["الحوسبة السحابية (Cloud Computing)", "الشبكات المحلية (LAN)", "البرمجيات المفتوحة", "معالجة الدفعات"], en: ["Cloud Computing", "Local Area Network (LAN)", "Open source software", "Batch processing"] },
+   correct: 0
+  },
+  {
+   q: { ar: "إجراء المعاملات التجارية وبيع المنتجات عبر شبكات الإنترنت يسمى:", en: "Conducting commercial transactions and selling products over the internet is called:" },
+   options: { ar: ["التجارة الإلكترونية (E-Commerce)", "الحكومة الإلكترونية", "البريد الصوتي", "الإدارة المالية"], en: ["E-Commerce", "E-government", "Voicemail", "Financial management"] },
+   correct: 0
+  },
+  {
+   q: { ar: "النظام الذي يسجل العمليات والمعاملات التشغيلية اليومية المتكررة هو:", en: "The system that records repetitive daily operational transactions is:" },
+   options: { ar: ["نظم معالجة المعاملات (TPS)", "نظم دعم التنفيذ", "نظم الذكاء الاصطناعي", "نظم إدارة علاقات العملاء"], en: ["Transaction Processing Systems (TPS)", "Executive support systems", "AI systems", "CRM systems"] },
+   correct: 0
+  },
+  {
+   q: { ar: "تحليل النظم يعني:", en: "Systems analysis means:" },
+   options: { ar: ["دراسة النظام الحالي وتحديد متطلبات النظام الجديد", "كتابة أكواد لغة C++", "إصلاح أعطال الأجهزة الصلبة", "بيع الأجهزة للمؤسسة"], en: ["Studying the current system and defining requirements for the new one", "Writing C++ code", "Repairing hardware faults", "Selling hardware to the organization"] },
+   correct: 0
+  }
+ ],
+ "Islamic Studies II": [
+  {
+   q: { ar: "الأسرة في الإسلام تُعتبر:", en: "The family in Islam is considered:" },
+   options: { ar: ["النواة الأساسية لبناء المجتمع والمبنية على المودة والرحمة", "مؤسسة اقتصادية بحتة", "تجمع مؤقت بلا روابط", "قطاع حكومي خدمي"], en: ["The core nucleus of society built on affection and mercy", "A purely economic institution", "A temporary bondless gathering", "A government service sector"] },
+   correct: 0
+  },
+  {
+   q: { ar: "من مقاصد الشريعة الإسلامية الكلية (الضروريات الخمس):", en: "Among the overall objectives of Islamic Sharia (the five necessities) are:" },
+   options: { ar: ["حفظ الدين، النَفْس، العقل، المال، والنسل", "جمع الأموال وزيادة الأرباح التجارية", "بناء ناطحات السحاب والمصانع", "السفر والسياحة الخارجية"], en: ["Preservation of religion, life, intellect, wealth, and lineage", "Accumulating wealth and increasing commercial profits", "Building skyscrapers and factories", "External travel and tourism"] },
+   correct: 0
+  },
+  {
+   q: { ar: "القاعدة الأصلية في المعاملات المالية والعادية في الإسلام هي:", en: "The fundamental rule in financial and routine transactions in Islam is:" },
+   options: { ar: ["الإباحة والجواز ما لم يرد نص بتحريمها", "التحريم المطلق حتى يثبت العكس", "التوقف عن كل معاملة جديدة", "الرجوع للعرف الغربي"], en: ["Permissibility unless text prohibits it", "Absolute prohibition until proven otherwise", "Stopping every new transaction", "Returning to Western custom"] },
+   correct: 0
+  },
+  {
+   q: { ar: "تحريم الربا في الاقتصاد الإسلامي يهدف إلى:", en: "The prohibition of Riba (usury) in the Islamic economy aims to:" },
+   options: { ar: ["حماية الأموال من استغلال المحتاجين وتحقيق العدالة الاجتماعية", "إيقاف عجلة الاستثمار نهائياً", "تشجيع الاحتكار", "إفلاس البنوك"], en: ["Protect money from exploiting the needy and achieve social justice", "Stop investment entirely", "Encourage monopoly", "Bankrupt banks"] },
+   correct: 0
+  },
+  {
+   q: { ar: "الشورى في نظام الحكم وإدارة شؤون المجتمع تعتبر:", en: "Shura (consultation) in governance and managing community affairs is considered:" },
+   options: { ar: ["مبدأً إسلامياً أصيلاً لتدبير الأمور واتخاذ القرارات", "أمراً اختيارياً لا أهمية له", "تقليداً مأخوذاً من غير المسلمين", "محرمة شرعاً"], en: ["An authentic Islamic principle for managing affairs and decision-making", "An optional unimportant matter", "A tradition taken from non-Muslims", "Sharia-forbidden"] },
+   correct: 0
+  },
+  {
+   q: { ar: "من أخلاقيات العمل والمهنة في الإسلام:", en: "Among work and professional ethics in Islam are:" },
+   options: { ar: ["الإتقان، الأمانة، الصدق، والوفاء بالعقود", "الغش لتحقيق أرباح أسرع", "التهاون في أوقات العمل", "إخفاء عيوب السلع"], en: ["Excellence, honesty, truthfulness, and honoring contracts", "Cheating for faster profits", "Neglecting work hours", "Hiding product defects"] },
+   correct: 0
+  },
+  {
+   q: { ar: "حقوق الإنسان في الإسلام تتميز بأنها:", en: "Human rights in Islam are characterized as being:" },
+   options: { ar: ["ربانية المصدر، ثابتة، وشاملة لكرامة الإنسان", "متغيرة حسب أهواء الحكام", "خاصة بطبقة معينة دون غيرها", "تمنح بشروط تعسفية"], en: ["Divine in source, steady, and comprehensive of human dignity", "Changing according to rulers' whims", "Specific to a certain class only", "Granted under arbitrary conditions"] },
+   correct: 0
+  },
+  {
+   q: { ar: "الزكاة في النظام الاقتصادي الإسلامي تعتبر:", en: "Zakat in the Islamic economic system is considered:" },
+   options: { ar: ["ركناً مالياً فرضيّاً لتطهير الأموال ومساعدة الفقراء", "ضريبة اختيارية تدفع حسب الرغبة", "تبرعاً خيريّاً غير ملزم", "رسوم إدارية للدولة"], en: ["A mandatory financial pillar to purify wealth and help the poor", "An optional tax paid by desire", "A non-binding charity", "Administrative state fees"] },
+   correct: 0
+  },
+  {
+   q: { ar: "من وسائل حماية المجتمع الإسلامي من الجريمة:", en: "Among the ways to protect the Islamic society from crime are:" },
+   options: { ar: ["التربية الإيمانية، إقامة العدل، والتشريعات الرادعة", "إشاعة الفوضى والحرية المطلقة", "إلغاء العقوبات القانونية", "الجهل والتخلف المتعمد"], en: ["Faith education, establishing justice, and deterrent legislation", "Spreading chaos and absolute freedom", "Canceling legal punishments", "Deliberate ignorance and backwardness"] },
+   correct: 0
+  },
+  {
+   q: { ar: "أساس العلاقات الدولية في الإسلام مع الآخرين هو:", en: "The basis of international relations in Islam with others is:" },
+   options: { ar: ["السلام، العدل، التعاون البناء، والوفاء بالعهود", "العداء الدائم والحروب المستمرة", "العزلة التامة عن العالم", "فرض الرأي بالقوة"], en: ["Peace, justice, constructive cooperation, and fulfilling covenants", "Permanent hostility and continuous wars", "Total isolation from the world", "Imposing opinion by force"] },
+   correct: 0
+  }
+ ],
+ "Managing People": [
+  {
+   q: { ar: "إدارة الموارد البشرية تهتم بـ:", en: "Human Resource Management focuses on:" },
+   options: { ar: ["استقطاب وتطوير وإدارة العنصر البشري بكفاءة في المنظمة", "صيانة أجهزة الحاسوب والشبكات", "حساب الأرباح والخسائر مالياً", "شراء المواد الخام للمصنع"], en: ["Attracting, developing, and efficiently managing human capital", "Maintaining computers and networks", "Calculating financial profit and loss", "Buying raw materials"] },
+   correct: 0
+  },
+  {
+   q: { ar: "تحليل الوظيفة (Job Analysis) يهدف إلى:", en: "Job Analysis aims to:" },
+   options: { ar: ["تحديد واجبات ومهام ومسؤوليات وظروف أداء الوظيفة", "تحديد أجر الموظف فقط", "فصل الموظفين القدامى", "تقييم أرباح الأسهم"], en: ["Determine duties, tasks, responsibilities, and working conditions", "Determine employee pay only", "Fire old employees", "Evaluate stock profits"] },
+   correct: 0
+  },
+  {
+   q: { ar: "عملية تقييم الأداء الوظيفي تساعد في:", en: "Performance appraisal helps in:" },
+   options: { ar: ["قياس إنجاز الموظفين وتحديد الاحتياجات التدريبية", "زيادة ساعات العمل الإجبارية", "خفض رواتب العاملين", "إلغاء الإجازات السنوية"], en: ["Measuring employee achievement and identifying training needs", "Increasing mandatory work hours", "Lowering salaries", "Canceling annual leaves"] },
+   correct: 0
+  },
+  {
+   q: { ar: "التحفيز (Motivation) في بيئة العمل هو:", en: "Motivation in the work environment is:" },
+   options: { ar: ["القوى الداخلية والخارجية التي تحرك وتدفع الفرد لبذل الجهد", "إجبار الموظف بالقوة على العمل", "تقليل الحوافز المالية", "تجاهل إنجازات العاملين"], en: ["Internal and external forces driving an individual to exert effort", "Forcing an employee to work", "Reducing financial incentives", "Ignoring employee achievements"] },
+   correct: 0
+  },
+  {
+   q: { ar: "دراسة السلوك التنظيمي تركز على:", en: "Organizational behavior study focuses on:" },
+   options: { ar: ["سلوك الأفراد والجماعات وتأثيرهم على بيئة العمل التنظيمية", "حركة الأسهم في بورصة الأسواق المالية", "تصميم البرمجيات وقواعد البيانات", "القواعد القانونية للدستور"], en: ["Individual and group behavior and their impact on the organizational environment", "Stock market movements", "Software and database design", "Constitutional legal rules"] },
+   correct: 0
+  },
+  {
+   q: { ar: "القيادة الفعالة في المؤسسات تتميز بـ:", en: "Effective leadership in organizations is characterized by:" },
+   options: { ar: ["إلهام العاملين، توجيههم نحو الأهداف، وحل النزاعات", "التسلط واتخاذ القرارات الفردية المطلقة", "إهمال آراء المرؤوسين", "تجنب التواصل مع فريق العمل"], en: ["Inspiring employees, guiding them toward goals, and resolving conflicts", "Autocracy and absolute individual decisions", "Ignoring subordinates' views", "Avoiding team communication"] },
+   correct: 0
+  },
+  {
+   q: { ar: "من استراتيجيات التعامل مع الصراع التنظيمي:", en: "Strategies for dealing with organizational conflict include:" },
+   options: { ar: ["التفاوض، التعاون، التسوية، والحلول الوسطى", "تأجيج المشاكل وتوسيع نطاق الخلاف", "إقالة جميع أطراف النزاع فوراً", "تجاهل المشكلة حتى تتفاقم"], en: ["Negotiation, cooperation, compromise, and middle grounds", "Fueling problems and expanding conflict", "Firing all conflicting parties immediately", "Ignoring the problem until it worsens"] },
+   correct: 0
+  },
+  {
+   q: { ar: "عملية اختيار وتعيين الموظفين الجدد تتضمن:", en: "The process of selecting and hiring new employees includes:" },
+   options: { ar: ["الفرز، المقابلات الشخصية، والاختبارات المهنية", "القبول العشوائي دون مقابلات", "اختيار أقارب الإدارة فقط", "التعيين بلا شروط"], en: ["Screening, personal interviews, and professional tests", "Random acceptance without interviews", "Choosing management relatives only", "Unconditional hiring"] },
+   correct: 0
+  },
+  {
+   q: { ar: "التدريب والتطوير المستمر للعاملين يؤدي إلى:", en: "Continuous training and development for workers leads to:" },
+   options: { ar: ["رفع الكفاءة الإنتاجية ومواكبة متطلبات العمل المتغيرة", "زيادة هدر الوقت والمال", "ركود المهارات المهنية", "كثرة الأخطاء التشغيلية"], en: ["Raising production efficiency and keeping pace with changing work requirements", "Increasing waste of time and money", "Stagnation of professional skills", "Frequent operational errors"] },
+   correct: 0
+  },
+  {
+   q: { ar: "خصائص فريق العمل الناجح تشمل:", en: "Characteristics of a successful work team include:" },
+   options: { ar: ["الأهداف المشتركة، الثقة المتبادلة، والتواصل الفعال", "الصراع المستمر وانعدام الثقة", "غياب التعاون وتوزيع المهام عشوائياً", "تفرد شخص واحد بالقرار"], en: ["Common goals, mutual trust, and effective communication", "Continuous conflict and lack of trust", "Absence of cooperation and random task distribution", "One person monopolizing decisions"] },
+   correct: 0
+  }
+ ],
+ "Programming Methods I": [
+  {
+   q: { ar: "الدالة الرئيسية التي يبدأ تنفيذ برنامج C++ منها هي:", en: "The main function from which a C++ program starts execution is:" },
+   options: { ar: ["void start()", "int main()", "begin()", "run_program()"], en: ["void start()", "int main()", "begin()", "run_program()"] },
+   correct: 1
+  },
+  {
+   q: { ar: "نوع البيانات المناسب لتخزين الأعداد الصحيحة في C++ هو:", en: "The appropriate data type for storing integers in C++ is:" },
+   options: { ar: ["float", "int", "char", "string"], en: ["float", "int", "char", "string"] },
+   correct: 1
+  },
+  {
+   q: { ar: "الأمر المستخدم لإدخال البيانات من المستخدم في C++ هو:", en: "The command used to input data from the user in C++ is:" },
+   options: { ar: ["cout", "cin", "print", "scanf"], en: ["cout", "cin", "print", "scanf"] },
+   correct: 1
+  },
+  {
+   q: { ar: "الجملة الشرطية التي تختبر عدة حالات باختيارات متعددة هي:", en: "The conditional statement that tests multiple cases with multiple choices is:" },
+   options: { ar: ["if-else فقط", "switch", "cin", "array"], en: ["if-else only", "switch", "cin", "array"] },
+   correct: 1
+  },
+  {
+   q: { ar: "الحلقة التكرارية المناسبة للتكرار عدد معلوم من المرات هي:", en: "The appropriate loop for repeating a known number of times is:" },
+   options: { ar: ["for loop", "while loop", "do-while loop", "if statement"], en: ["for loop", "while loop", "do-while loop", "if statement"] },
+   correct: 0
+  },
+  {
+   q: { ar: "المصفوفة (Array) هي:", en: "An array is:" },
+   options: { ar: ["متغير يخزن قيمة واحدة فقط", "هيكل بيانات يجمع عناصر من نفس النوع تحت اسم واحد", "دالة رياضية جاهزة", "مكتبة برمجية للنظام"], en: ["A variable storing only one value", "A data structure collecting elements of the same type under one name", "A ready-made mathematical function", "A system library code"] },
+   correct: 1
+  },
+  {
+   q: { ar: "التمرير بالمرجع (Pass by Reference) في الدوال يتم باستخدام الرمز:", en: "Pass by reference in functions is done using the symbol:" },
+   options: { ar: ["*", "&", "#", "$"], en: ["*", "&", "#", "$"] },
+   correct: 1
+  },
+  {
+   q: { ar: "المؤشرات (Pointers) هي متغيرات تُستخدم لتخزين:", en: "Pointers are variables used to store:" },
+   options: { ar: ["القيم الرقمية مباشرة", "عناوين الذاكرة للمتغيرات الأخرى", "النصوص الطويلة فقط", "أسماء الدوال"], en: ["Numeric values directly", "Memory addresses of other variables", "Long texts only", "Function names"] },
+   correct: 1
+  },
+  {
+   q: { ar: "المكتبة الأساسية للتعامل مع عمليات الإدخال والإخراج القياسية في C++ هي:", en: "The essential library for handling standard input/output operations in C++ is:" },
+   options: { ar: ["<iostream>", "<cmath>", "<string>", "<vector>"], en: ["<iostream>", "<cmath>", "<string>", "<vector>"] },
+   correct: 0
+  },
+  {
+   q: { ar: "الفرق الأساسي بين while و do-while أن do-while تضمن تنفيذ الكود:", en: "The main difference between while and do-while is that do-while guarantees executing the code:" },
+   options: { ar: ["مرة واحدة على الأقل قبل التحقق من الشرط", "ألا ينفذ أبداً", "بشكل لا نهائي دائماً", "بدون استخدام شروط"], en: ["At least once before checking the condition", "Never to execute", "Infinitely always", "Without using conditions"] },
+   correct: 0
+  }
+ ],
+ "Sudanese Studies": [
+  {
+   q: { ar: "استقل السودان وأعلن دولة مستقلة في تاريخ:", en: "Sudan became independent and declared as an independent state on:" },
+   options: { ar: ["1 يناير 1956م", "25 ديسمبر 1960م", "14 يوليو 1952م", "30 نوفمبر 1955م"], en: ["January 1, 1956", "December 25, 1960", "July 14, 1952", "November 30, 1955"] },
+   correct: 0
+  },
+  {
+   q: { ar: "يتميز السودان جغرافياً بـ:", en: "Sudan is geographically characterized by:" },
+   options: { ar: ["مروره بنهر النيل وتنوع مناخه وبيئاته", "كونه صحراء قاحلة بالكامل", "عدم وجود مصادر مياه", "وقوعه في أمريكا اللاتينية"], en: ["The Nile River passing through it and diverse climate/environments", "Being entirely a barren desert", "Lacking water sources", "Being located in Latin America"] },
+   correct: 0
+  },
+  {
+   q: { ar: "من أبرز الحضارات التاريخية القديمة في السودان:", en: "Among the most prominent ancient historical civilizations in Sudan are:" },
+   options: { ar: ["مملكة كوش وحضارة نبتة ومروة", "الإمبراطورية الرومانية", "حضارة الإنكا", "حضارة المايا"], en: ["Kingdom of Kush, Napata, and Meroe", "Roman Empire", "Inca civilization", "Maya civilization"] },
+   correct: 0
+  },
+  {
+   q: { ar: "الموارد الاقتصادية الطبيعية الرئيسية في السودان تشمل:", en: "The main natural economic resources in Sudan include:" },
+   options: { ar: ["الزراعة، الثروة الحيوانية، والمعادن", "صناعة الطائرات الحربية", "التعدين الفضائي", "إنتاج الرقائق الإلكترونية الدقيقة"], en: ["Agriculture, livestock, and minerals", "Military aircraft manufacturing", "Space mining", "Microchip production"] },
+   correct: 0
+  },
+  {
+   q: { ar: "يتميز المجتمع السوداني بـ:", en: "Sudanese society is characterized by:" },
+   options: { ar: ["التنوع الإثني والثقافي واللغوي الثري", "الانغلاق الثقافي التام", "وجود عرق وثقافة واحدة فقط", "عدم وجود تراث شعبي"], en: ["Rich ethnic, cultural, and linguistic diversity", "Complete cultural closure", "Presence of only one race and culture", "Absence of folklore"] },
+   correct: 0
+  },
+  {
+   q: { ar: "يمثل موقع السودان الجغرافي استراتيجياً:", en: "Sudan's geographical location strategically represents:" },
+   options: { ar: ["حلقة وصل بين العالم العربي وإفريقيا", "جزيرة منعزلة في المحيط الهادئ", "قطباً شمالياً بارداً", "حدوداً تفصل أوروبا عن آسيا"], en: ["A bridge between the Arab world and Africa", "An isolated island in the Pacific Ocean", "A cold North Pole", "A border separating Europe and Asia"] },
+   correct: 0
+  },
+  {
+   q: { ar: "من المعالم الأثرية والتاريخية البارزة في السودان:", en: "Among the prominent archaeological and historical landmarks in Sudan are:" },
+   options: { ar: ["أهرامات البجراوية وجبل البركل", "سور الصين العظيم", "برج إيفل", "تمثال الحرية"], en: ["Meroe Pyramids and Jebel Barkal", "Great Wall of China", "Eiffel Tower", "Statue of Liberty"] },
+   correct: 0
+  },
+  {
+   q: { ar: "الإرث الثقافي والفني في السودان يظهر بوضوح في:", en: "Cultural and artistic heritage in Sudan clearly appears in:" },
+   options: { ar: ["التنوع الموسيقي، الشعر الغنائي، والفنون التشكيلية العريقة", "انعدام الفنون والثقافة", "غياب الموسيقى الشعبية", "الفلكلور المستورد بالكامل"], en: ["Musical diversity, lyrical poetry, and ancient fine arts", "Absence of arts and culture", "Absence of folk music", "Fully imported folklore"] },
+   correct: 0
+  },
+  {
+   q: { ar: "التحديات الكبرى التي تواجه مسيرة التنمية في السودان تشمل:", en: "Major challenges facing the development path in Sudan include:" },
+   options: { ar: ["تحقيق الاستقرار السياسي، الاقتصادي، وتطوير البنى التحتية", "غياب الموارد الطبيعية بالكلية", "زيادة عدد المحيطات", "عدم وجود سكان"], en: ["Achieving political and economic stability and infrastructure development", "Total absence of natural resources", "Increasing oceans", "Absence of population"] },
+   correct: 0
+  },
+  {
+   q: { ar: "نظام الإدارة والتقاليد المحلية في السودان تكاملت تاريخياً مع:", en: "The system of administration and local traditions in Sudan historically integrated with:" },
+   options: { ar: ["نظم الإدارة الأهلية والمحلية المتوارثة", "الإدارة الفضائية الرقمية", "القوانين البحرية الدولية فقط", "الأنظمة الاقتصادية الافتراضية"], en: ["Inherited native and local administration systems", "Digital space administration", "International maritime laws only", "Virtual economic systems"] },
+   correct: 0
+  }
+ ]
+};
+
+/* Direct links (work without listing). Add more lines here any time. */
+const STATIC = {
+ "Arabic Language II": {
+  "Lectures": [
+   {name:"Arabic 1", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Arabic%20Language%20II/Arabic%201"},
+   {name:"Arabic 2", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Arabic%20Language%20II/bdf2.pdf"},
+   {name:"Arabic 3", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Arabic%20Language%20II/bdf3%20(1).pdf"},
+   {name:"Arabic 4", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Arabic%20Language%20II/bdf4.pdf"},
+   {name:"Arabic 5", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Arabic%20Language%20II/bdf5.pdf"},
+   {name:"Arabic 6", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Arabic%20Language%20II/bdf6.pdf"},
+   {name:"Arabic 7", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Arabic%20Language%20II/bdf7.pdf"},
+   {name:"Arabic 8", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Arabic%20Language%20II/bdf8.pdf"},
+   {name:"Arabic 9", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Arabic%20Language%20II/bdf9.pdf"},
+   {name:"Arabic 10", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Arabic%20Language%20II/bdf10.pdf"}
+  ]
+ },
+  "Calculus": {
+  "Lectures": [
+   {name:"Calculus II", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Calculus%20II/Calculus%20II.pdf"}
+  ]
+ },
+ "Computer Applications for Business": {
+  "Lectures": [
+   {name:"MCQZ", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Computer%20business/MCQZ.pdf"},
+   {name:"Excel", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Computer%20business/Excel.pdf"},
+   {name:"Excel Complete", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Computer%20business/Excel%20Complete.pdf"}
+  ]
+ },
+ "Sudanese Studies": {
+  "Lectures": [
+   {name:"Sudanese Studies", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Sudanese%20Studies/Sudanese%20Studies.pdf"}
+  ]
+ },
+ "Islamic Studies II": {
+  "Lectures": [
+   {name:"Islamic 2", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Islamic%20II/Islamic2.pdf"}
+  ]
+ },
+ "English Language II": {
+  "Lectures": [
+   {name:"Lesson 1", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/English%20II/lesson%201_2a0607a8d04feca7b86f87917f5b62c1.pptx"},
+   {name:"Lesson 2", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/English%20II/lesson%202_88d6531af0b9f16901ad974e3b7e8b07.pptx"},
+   {name:"Lesson 3", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/English%20II/lesson%203_613f744cd8006cb742a0b1c263a4ef92.pptx"},
+   {name:"Lesson 4", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/English%20II/lesson%204_847767a47f9730469a59cbaa8831299a.pptx"},
+   {name:"Lesson 5", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/English%20II/lesson%205_3b1c36f743892cfcae1631f28080702e.pptx"},
+   {name:"Lesson 6", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/English%20II/lesson%206_30d572b94b142df78a8d57e2bbba7c67.pptx"},
+   {name:"Lesson 7", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/English%20II/lesson%207_5b942a6751c232556e482e0437311872.pptx"},
+   {name:"Lesson 8", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/English%20II/lesson%208_1748a39339391c32f8a3066eb4172000.pptx"},
+   {name:"Lesson 9", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/English%20II/lesson%209_0475c4d589e910c1e0a72304ed7789e4.pptx"},
+   {name:"Lesson 10", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/English%20II/lesson%2010_7784aa01feb7ff2a1179b616f59d26dc.pptx"}
+  ]
+ },
+ "Managing People": {
+  "Lectures": [
+   {name:"Managing 1", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Managing%20people/Managing1.pdf"},
+   {name:"Managing 2", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Managing%20people/Managing2.pdf"},
+   {name:"3 - Understanding Individual Behavior 1", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Managing%20people/3-%20Understanding%20Individual%20Behavior1_b92522c625a5a9aab039cbec25b229be.pptx"},
+   {name:"4 - Understanding Individual Behavior 2", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Managing%20people/4-%20Understanding%20Individual%20Behavior2_17896c1b20e10c32e4c14f8b68beeaf6.pptx"},
+   {name:"5 - Understanding Individual Behavior 3", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Managing%20people/5-%20Understanding%20Individual%20Behavior3_9186f3525eab740f3318189556ed1819.pptx"},
+   {name:"6 - Groups and Teams", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Managing%20people/6-%20Groups%20and%20Teams_be62de1373b7e81f6875e99ea0be0000.pptx"},
+   {name:"7 - Work Design and Job Analysis", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Managing%20people/7-%20Work%20Design%20and%20Job%20Analysis_609f0ed4777290648380d7c5139c7103.pptx"},
+   {name:"8 - Recruitment", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Managing%20people/8-%20Recruitment_ab4ee91378d5a2de3f334ab94f55603a.pptx"},
+   {name:"9 - Selection", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Managing%20people/9-%20Selection_b2641fabe5d44b148fd194265c597891.pptx"},
+   {name:"10 - Performance Appraisal", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Managing%20people/10-%20Performance%20Appraisal_c073c1828b2d89ada87abdee01d0ebb1.pptx"}
+  ]
+ },
+ "Programming Methods I": {
+  "Lectures": [
+   {name:"Lecture 1", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Programing%20method%201/LEC%201"},
+   {name:"Lecture 2", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Programing%20method%201/LEC%202"},
+   {name:"Lecture 3 - C++ Data Types", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Programing%20method%201/LEC%203%20C++%20data%20types.pdf"},
+   {name:"Lecture 4 - C++ Input & Operators", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Programing%20method%201/LEC%204%20C++%20input&operators.pdf"},
+   {name:"Lecture 5 - String and Math C++", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Programing%20method%201/LEC%205%20String%20and%20Math%20C++.pdf"},
+   {name:"Lecture 6 - Control Statement C++", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Programing%20method%201/LEC%206%20Control%20Statement%20C++.pdf"},
+   {name:"Lecture 7 - Loops C++", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Programing%20method%201/LEC%207%20Loops%20%20C++.pdf"},
+   {name:"Lecture 8", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Programing%20method%201/LEC%208"},
+   {name:"Lecture 9", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Programing%20method%201/LEC%209"}
+  ]
+ },
+ "Accounting I": {
+  "Lectures": [
+   {name:"Accounting Sheet 1", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Accounting/Accounting%20(1).pdf"}
+  ]
+ },
+ "Fundamentals of Information Systems": {
+  "Lectures": [
+   {name:"ICT Work Sheet 1", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Fundamental%20of%20information%20systems/ICT%20WORK%20SHEET%201"},
+   {name:"ICT Work Sheet 2", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Fundamental%20of%20information%20systems/ICT%20WORK%20SHEET%202"},
+   {name:"ICT Work Sheet 3", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Fundamental%20of%20information%20systems/ICT%20Worksheet%203."}
+  ]
+ }
+};
+
+/* ===== Helpers ===== */
+const $ = id => document.getElementById(id);
+let lang = "en", subject = "", material = "";
+const cache = {};
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const pages = ["homePage","tasksPage","subjectPage","materialsPage","aboutPage"];
+function show(id){ pages.forEach(p => $(p).style.display = p===id ? "block" : "none"); window.scrollTo(0,0); }
+const sb = window.supabase ? window.supabase.createClient(STORAGE_URL, STORAGE_KEY) : null;
+const folderOf = name => SUBJECTS.find(s => s[0]===name)[2];
+
+/* ===== Storage ===== */
+async function listFiles(path){
+ const {data,error} = await sb.storage.from(BUCKET).list(path,{limit:200,sortBy:{column:"name",order:"asc"}});
+ if(error) throw error;
+ return (data||[]).filter(f => f.id && f.name !== ".emptyFolderPlaceholder").map(f => ({
+  name: f.name.replace(/\.[^.]+$/,""),
+  url: sb.storage.from(BUCKET).getPublicUrl(path+"/"+f.name).data.publicUrl
+ }));
+}
+async function loadFiles(){
+ const key = subject+"|"+material;
+ if(cache[key]) return cache[key];
+ const fixed = (STATIC[subject] && STATIC[subject][material]) || [];
+ let listed = [], approved = [];
+ if(!STORAGE_KEY.startsWith("PASTE")){
+  try{
+   const folder = folderOf(subject);
+   listed = await listFiles(folder+"/"+material);
+   if(material==="Lectures") listed = listed.concat(await listFiles(folder));
+  }catch(e){ console.error(e); if(!fixed.length && !sb) throw e; }
+  try{
+   const {data,error} = await sb.from("submissions").select("name,path").eq("subject",subject).eq("material",material).eq("approved",true);
+   if(!error) approved = (data||[]).map(r=>({name:r.name,url:r.path}));
+  }catch(e){ console.error("Could not load approved submissions:",e); }
+ }
+ const all = fixed.concat(listed, approved);
+ const seen = new Set(); const out = [];
+ all.forEach(f=>{ if(!seen.has(f.url)){ seen.add(f.url); out.push(f); } });
+ return cache[key] = out;
+}
+
+/* ===== Student upload ===== */
+async function uploadFile(){
+ const input = $("uploadInput"), btn = $("uploadBtn");
+ const file = input.files[0];
+ if(!file) return;
+ if(STORAGE_KEY.startsWith("PASTE")){
+  note(lang==="ar"?"الرفع غير مفعّل بعد.":"Upload is not enabled yet.", true); return;
+ }
+ btn.disabled = true;
+ note(lang==="ar"?"جارٍ الرفع...":"Uploading...", false);
+ try{
+  const safeName = file.name.replace(/[^\w.\-]+/g,"_");
+  const path = "pending/"+Date.now()+"_"+safeName;
+  const {error: upErr} = await sb.storage.from(BUCKET).upload(path, file);
+  if(upErr) throw upErr;
+  const url = sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+  const {error: insErr} = await sb.from("submissions").insert([{
+   subject, material, name: file.name.replace(/\.[^.]+$/,"").slice(0,120), path: url, approved:false
+  }]);
+  if(insErr) throw insErr;
+  note(lang==="ar"?"تم الرفع، سيظهر بعد موافقة الأدمن ✅":"Uploaded. It will appear after admin approval ✅", false);
+  input.value = "";
+ }catch(e){
+  console.error(e);
+  note(lang==="ar"?"تعذر رفع الملف.":"Could not upload the file.", true);
+ }finally{
+  btn.disabled = false;
+ }
+}
+function note(text, err){
+ const m = $("uploadMsg");
+ m.textContent = text; m.className = "msg"+(err?" err":""); m.style.display = "block";
+ setTimeout(()=>{ m.style.display = "none"; }, 6000);
+}
+
+/* ===== Views & Favorites ===== */
+const FAV_KEY = "fav_subjects";
+function loadFavs(){
+ try{ return JSON.parse(localStorage.getItem(FAV_KEY)) || []; }
+ catch{ return []; }
+}
+function saveFavs(list){
+ try{ localStorage.setItem(FAV_KEY, JSON.stringify(list)); }
+ catch(e){ console.error("Could not save favorites:", e); }
+}
+function toggleFav(name){
+ const favs = loadFavs();
+ const i = favs.indexOf(name);
+ if(i===-1) favs.push(name); else favs.splice(i,1);
+ saveFavs(favs);
+ renderSubjects();
+}
+
+/* ===== Terms (T1 = first term, T2 = new term) ===== */
+const TERM_KEY = "current_term";
+let currentTerm = "T1";
+try{ currentTerm = localStorage.getItem(TERM_KEY) || "T1"; }catch(e){}
+function updateTermButtons(){
+ $("termT1Btn").classList.toggle("active", currentTerm==="T1");
+ $("termT2Btn").classList.toggle("active", currentTerm==="T2");
+}
+function setTerm(t){
+ currentTerm = t;
+ try{ localStorage.setItem(TERM_KEY, t); }catch(e){}
+ updateTermButtons();
+ renderSubjects();
+}
+
+function renderSubjects(){
+ const list=$("subjectList"); list.replaceChildren();
+ const favs = loadFavs();
+ const filtered = SUBJECTS.filter(s => s[3]===currentTerm);
+ const ordered = [...filtered].sort((a,b)=> favs.includes(b[0]) - favs.includes(a[0]));
+ ordered.forEach(([name,icon])=>{
+  const c=el("div","subject");
+  const star=el("span","fav-star"+(favs.includes(name)?" active":""),favs.includes(name)?"⭐":"☆");
+  star.addEventListener("click", e=>{ e.stopPropagation(); toggleFav(name); });
+  c.append(star, el("div","icon",icon), el("h3","",name));
+  c.addEventListener("click",()=>openSubject(name)); list.append(c);
+ });
+ $("counter").textContent = lang==="ar" ? filtered.length+" مواد دراسية" : filtered.length+" Academic Subjects";
+}
+
+/* ===== Exam countdown ===== */
+const EXAM_KEY = "exam_dates";
+function loadExamDates(){
+ try{ return JSON.parse(localStorage.getItem(EXAM_KEY)) || {}; }
+ catch{ return {}; }
+}
+function saveExamDates(obj){
+ try{ localStorage.setItem(EXAM_KEY, JSON.stringify(obj)); }
+ catch(e){ console.error("Could not save exam date:", e); }
+}
+function renderExamCountdown(){
+ const dates = loadExamDates();
+ const dateStr = dates[subject] || "";
+ $("examDate").value = dateStr;
+ const card = $("examDate").closest(".exam-card");
+ const textEl = $("examText");
+ if(!dateStr){
+  textEl.textContent = lang==="ar" ? "⏳ لم يُحدد موعد امتحان" : "⏳ No exam date set";
+  card.classList.remove("urgent");
+  return;
+ }
+ const today = new Date(); today.setHours(0,0,0,0);
+ const examDay = new Date(dateStr+"T00:00:00");
+ const days = Math.round((examDay - today) / 86400000);
+ card.classList.toggle("urgent", days>=0 && days<=2);
+ if(days < 0) textEl.textContent = lang==="ar" ? "✅ انتهى موعد هذا الامتحان" : "✅ This exam date has passed";
+ else if(days === 0) textEl.textContent = lang==="ar" ? "🚨 الامتحان اليوم!" : "🚨 Exam is today!";
+ else textEl.textContent = (lang==="ar" ? "⏳ باقي "+days+" يوم على الامتحان" : "⏳ "+days+" day(s) left until the exam");
+}
+
+function openSubject(name){
+ subject=name; $("subjectName").textContent="📚 "+name;
+ renderExamCountdown();
+ const list=$("materialList"); list.replaceChildren();
+ MATERIALS.forEach(([key,icon,en,ar])=>{
+  const c=el("div","material"); c.append(el("div","material-icon",icon), el("h3","",lang==="ar"?ar:key), el("p","",lang==="ar"?ar:en));
+  c.addEventListener("click",()=>openMaterial(key)); list.append(c);
+ });
+ show("subjectPage");
+}
+
+async function openMaterial(key){
+ material=key; 
+ const isAr = (lang === "ar");
+ $("materialTitle").textContent = subject + " - " + (key==="Questions" ? (isAr ? "أسئلة الاختيار المتعدد" : "Review Questions (MCQ)") : key); 
+ show("materialsPage");
+ $("fileSearchInput").value = "";
+ 
+ const uploadCard = $("uploadCardSection");
+ if(key === "Questions") {
+  uploadCard.style.display = "none";
+ } else {
+  uploadCard.style.display = "block";
+ }
+
+ const list = $("fileList"); 
+
+ /* عرض الأسئلة ثنائية اللغة في جدول تفاعلي */
+ if(key === "Questions"){
+  list.replaceChildren();
+  const qList = QUESTIONS_DATA[subject] || [];
+  if(!qList.length){
+   list.append(el("div","empty","📂 "+(isAr ? "لا توجد أسئلة متاحة حالياً." : "No questions available.")));
+   return;
+  }
+  
+  const table = document.createElement("table");
+  table.className = "mcq-table";
+  
+  const thead = document.createElement("thead");
+  thead.innerHTML = `<tr><th>#</th><th>${isAr ? "السؤال" : "Question"}</th><th>${isAr ? "الخيارات" : "Options"}</th></tr>`;
+  table.appendChild(thead);
+  
+  const tbody = document.createElement("tbody");
+  qList.forEach((item, index) => {
+   const tr = document.createElement("tr");
+   
+   const tdNum = document.createElement("td");
+   tdNum.textContent = index + 1;
+   tdNum.style.fontWeight = "bold";
+   tdNum.style.width = "50px";
+   
+   const tdQ = document.createElement("td");
+   tdQ.textContent = item.q[lang] || item.q.en || item.q.ar;
+   tdQ.style.fontWeight = "bold";
+   
+   const tdOpts = document.createElement("td");
+   const optsArray = item.options[lang] || item.options.en || item.options.ar;
+   
+   optsArray.forEach((opt, optIdx) => {
+    const btn = document.createElement("button");
+    btn.className = "option-btn";
+    btn.textContent = opt;
+    btn.onclick = () => {
+     const allBtns = tdOpts.querySelectorAll(".option-btn");
+     allBtns.forEach(b => b.disabled = true);
+     
+     if(optIdx === item.correct) {
+      btn.style.background = "#d4edda";
+      btn.style.color = "#155724";
+      btn.style.borderColor = "#c3e6cb";
+     } else {
+      btn.style.background = "#f8d7da";
+      btn.style.color = "#721c24";
+      btn.style.borderColor = "#f5c6cb";
+      allBtns[item.correct].style.background = "#d4edda";
+      allBtns[item.correct].style.color = "#155724";
+      allBtns[item.correct].style.borderColor = "#c3e6cb";
+     }
+    };
+    tdOpts.appendChild(btn);
+   });
+   
+   tr.append(tdNum, tdQ, tdOpts);
+   tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  list.append(table);
+  return;
+ }
+
+ list.replaceChildren(el("div","empty",isAr ? "جارٍ التحميل..." : "Loading..."));
+ let data=[];
+ try{ data = await loadFiles(); }
+ catch(e){ console.error(e); list.replaceChildren(el("div","empty",isAr ? "تعذر تحميل الملفات." : "Could not load files.")); return; }
+ if(material!==key) return; 
+ list.replaceChildren();
+ if(!data.length){ list.append(el("div","empty","📂 "+(isAr ? "لا توجد ملفات بعد." : "No files available yet."))); return; }
+ data.forEach(f=>{
+  const row=el("div","file"); row.dataset.name = f.name.toLowerCase();
+  const b=el("button","",isAr ? "فتح" : "Open");
+  b.addEventListener("click",()=>window.open(f.url,"_blank","noopener"));
+  row.append(el("span","","📄 "+f.name), b); list.append(row);
+ });
+}
+
+function filterFiles(){
+ const q = $("fileSearchInput").value.toLowerCase();
+ document.querySelectorAll("#fileList tr").forEach(row=>{
+  if(row.parentNode.tagName === "THEAD") return;
+  row.style.display = row.textContent.toLowerCase().includes(q) ? "" : "none";
+ });
+ document.querySelectorAll("#fileList .file").forEach(row=>{
+  row.style.display = row.dataset.name.includes(q) ? "flex" : "none";
+ });
+}
+function searchSubjects(){
+ const q=$("searchInput").value.toLowerCase();
+ document.querySelectorAll(".subject").forEach(s=>{
+  s.style.display = s.querySelector("h3").textContent.toLowerCase().includes(q) ? "block":"none";
+ });
+}
+function applyLang(){
+ document.documentElement.lang=lang; document.documentElement.dir=lang==="ar"?"rtl":"ltr";
+ document.querySelectorAll("[data-en]").forEach(e=>{
+  const v=e.dataset[lang]; if(e.dataset.ph) e.placeholder=v; else e.textContent=v;
+ });
+ $("navLang").textContent = lang==="ar"?"English":"عربي";
+ renderSubjects();
+ if(material === "Questions") {
+  openMaterial("Questions");
+ }
+}
+
+/* ===== Study Tasks ===== */
+const TASKS_KEY = "study_tasks";
+function loadTasks(){
+ try{ return JSON.parse(localStorage.getItem(TASKS_KEY)) || []; }
+ catch{ return []; }
+}
+function saveTasks(list){
+ try{ localStorage.setItem(TASKS_KEY, JSON.stringify(list)); }
+ catch(e){ console.error("Could not save tasks:", e); }
+}
+function renderTasks(){
+ const list = loadTasks();
+ const ul = $("taskList"); ul.replaceChildren();
+ $("taskEmpty").style.display = list.length ? "none" : "block";
+ list.forEach((task,i)=>{
+  const li = el("li", task.done ? "done" : "");
+  const span = el("span","",task.text);
+  span.addEventListener("click", ()=>toggleTask(i));
+  const del = el("button","","✕");
+  del.addEventListener("click", ()=>deleteTask(i));
+  li.append(span, del); ul.append(li);
+ });
+}
+function addTask(){
+ const input = $("taskInput");
+ const text = input.value.trim();
+ if(!text) return;
+ const list = loadTasks();
+ list.push({text, done:false});
+ saveTasks(list);
+ input.value = "";
+ renderTasks();
+}
+function toggleTask(i){
+ const list = loadTasks();
+ list[i].done = !list[i].done;
+ saveTasks(list); renderTasks();
+}
+function deleteTask(i){
+ const list = loadTasks();
+ list.splice(i,1);
+ saveTasks(list); renderTasks();
+}
+
+/* ===== Events ===== */
+$("navHome").onclick=()=>show("homePage");
+$("navTasks").onclick=()=>{ show("tasksPage"); renderTasks(); };
+$("navAbout").onclick=()=>show("aboutPage");
+const DARK_KEY = "students_is_dark_mode";
+function applyDarkMode(enabled){
+  document.body.classList.toggle("dark", enabled);
+  $("navDark").textContent = enabled ? "☀️" : "🌙";
+  try { localStorage.setItem(DARK_KEY, enabled ? "1" : "0"); }
+  catch(e) { console.error("Could not save dark-mode preference:", e); }
+}
+$("navDark").onclick=()=>applyDarkMode(!document.body.classList.contains("dark"));
+$("navLang").onclick=()=>{ lang = lang==="en"?"ar":"en"; applyLang();
+try { applyDarkMode(localStorage.getItem(DARK_KEY) === "1"); }
+catch(e) { applyDarkMode(false); }
+show("homePage"); };
+$("backHome").onclick=()=>show("homePage");
+$("backSubject").onclick=()=>openSubject(subject);
+$("searchInput").addEventListener("input",searchSubjects);
+$("fileSearchInput").addEventListener("input",filterFiles);
+$("examSaveBtn").addEventListener("click",()=>{
+ const val = $("examDate").value;
+ if(!val) return;
+ const dates = loadExamDates();
+ dates[subject] = val;
+ saveExamDates(dates);
+ renderExamCountdown();
+});
+$("examClearBtn").addEventListener("click",()=>{
+ const dates = loadExamDates();
+ delete dates[subject];
+ saveExamDates(dates);
+ renderExamCountdown();
+});
+$("addTaskBtn").addEventListener("click",addTask);
+$("uploadBtn").addEventListener("click",uploadFile);
+
+/* ===== Secret admin shortcut ===== */
+(function(){
+ let taps = 0, timer = null;
+ $("footerLogo").addEventListener("click", ()=>{
+  taps++;
+  clearTimeout(timer);
+  timer = setTimeout(()=>{ taps = 0; }, 3000);
+  if(taps >= 5){
+   taps = 0;
+   $("adminLink").style.display = "inline-block";
+  }
+ });
+})();
+$("taskInput").addEventListener("keydown", e=>{ if(e.key==="Enter") addTask(); });
+
+$("termT1Btn").addEventListener("click",()=>setTerm("T1"));
+$("termT2Btn").addEventListener("click",()=>setTerm("T2"));
+updateTermButtons();
+applyLang();
+try { applyDarkMode(localStorage.getItem(DARK_KEY) === "1"); }
+catch(e) { applyDarkMode(false); }
+show("homePage");
