@@ -1,10 +1,10 @@
 # 🎓 Students IS Education Platform
+🔗 Live Demo: [computer-is-collage.netlify.app](https://computer-is-collage.netlify.app)
 
 منصة تعليمية ثنائية اللغة (عربي / English) لتنظيم المواد الجامعية والمحاضرات والامتحانات وأسئلة الاختيار المتعدد، لطلاب قسم نظم المعلومات.
 
 **Al-Bayan University** · College of Computer Science & IT · Information Systems Department
-
-## ✨ Features
+ ✨ Features:
 
 - 🌐 Bilingual interface (Arabic / English) with full RTL support
 - 🌙 Dark mode (saved in the browser)
@@ -39,14 +39,14 @@
    cd students-is-platform
    ```
 2. Create a Supabase project, then:
-   - Create a public Storage bucket named `Twix`
+   -Create a public Storage bucket named `materials `
    - Create a table `submissions` with columns:
      `subject`, `material`, `name`, `path`, `approved` (boolean, default `false`)
 3. In `index.html`, set your values:
    ```js
    const STORAGE_URL = "https://YOUR-PROJECT.supabase.co";
    const STORAGE_KEY = "YOUR_PUBLISHABLE_KEY";
-   const BUCKET = "Twix";
+   const BUCKET = "materials";
    ```
 4. Open `index.html` in a browser, or deploy with GitHub Pages / Netlify / Vercel.
 
