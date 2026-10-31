@@ -1,0 +1,3240 @@
+STUDENTS IS PLATFORM — ALL PROJECT FILES
+========================================================================
+Total files: 35
+Each section contains the original relative path and its full text content.
+========================================================================
+
+
+
+########################################################################
+FILE: .env.example
+########################################################################
+
+# انسخ هذا الملف إلى .env.local للتشغيل محلياً، وضع نفس القيم في Netlify:
+# Site configuration > Environment variables
+# (إذا لم تضعها، يستخدم المشروع القيم الحالية الموجودة في src/lib/supabase.js)
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR-PROJECT.supabase.co
+NEXT_PUBLIC_SUPABASE_KEY=sb_publishable_xxx
+NEXT_PUBLIC_STORAGE_BUCKET=Twix
+
+
+########################################################################
+FILE: .gitignore
+########################################################################
+
+node_modules
+.next
+out
+.env
+.env.local
+.DS_Store
+
+
+########################################################################
+FILE: README.md
+########################################################################
+
+# منصة Students IS التعليمية — Next.js
+
+جامعة البيان · كلية علوم الحاسوب وتقانة المعلومات · قسم نظم المعلومات
+
+مبنية بـ **Next.js 14** (تصدير ثابت Static Export) + **Supabase** (تسجيل الدخول والتخزين) + استضافة **Netlify**.
+
+## ⚠️ الإعداد لأول مرة (بالترتيب)
+
+1. **Supabase ← SQL Editor**: افتح `supabase/schema.sql`، غيّر `ADMIN_EMAIL_HERE` ببريد حساب الأدمن الحالي، ثم شغّله كاملاً.
+   - بدون هذه الخطوة لن تعمل صفحة الأدمن، وصلاحيات الطلاب لن تكون محمية.
+   - بعد التشغيل راجع السياسات القديمة (التعليمات في آخر الملف).
+2. **Supabase ← Authentication ← Providers**: تأكد أن Email مفعّل. في **URL Configuration** ضع رابط موقعك على Netlify في `Site URL` وأضفه إلى `Redirect URLs` (لرابط استعادة كلمة المرور).
+   - إن أردت أن يدخل الطالب مباشرة بعد التسجيل، عطّل "Confirm email".
+3. **GitHub**: ارفع محتويات هذا المجلد إلى المستودع المربوط بـ Netlify (استبدل الملفات القديمة).
+4. **Netlify ← Site configuration ← Build & deploy**:
+   - Build command: `npm run build`
+   - Publish directory: `out`
+   - (الملف `netlify.toml` يضبطهما تلقائياً، فإن ظهر تعارض امسح القيم القديمة من لوحة Netlify.)
+5. (اختياري) ضع متغيرات البيئة من `.env.example` في Netlify. إن لم تضعها يستخدم المشروع القيم الحالية.
+
+## التعديل من GitHub (يظهر مباشرة في المنصة)
+
+كل `commit` على المستودع يُنشر تلقائياً على Netlify خلال دقائق. الملفات التي تُعدَّل عادةً:
+
+| الملف | ما تغيّره فيه |
+|---|---|
+| `src/data/semesters.js` | إضافة مادة أو سمستر |
+| `src/data/files.js` | روابط المحاضرات والشيتات والامتحانات |
+| `src/data/questions.js` | أسئلة الاختيار من متعدد |
+| `src/data/aliases.js` | أسماء عربية بديلة للمواد (للبحث) |
+
+## الخطوط
+
+- English: **Inter** (الأساسي) · **Sora** (العناوين) · **JetBrains Mono** (الأكواد والأرقام)
+- العربي: **Amiri Bold** (العناوين) · **IBM Plex Sans Arabic Regular** (النص) · **Cairo SemiBold** (الواجهة)
+
+تُحمَّل عبر `next/font` في `src/app/layout.js`، وتُطبَّق في آخر `src/app/globals.css`.
+
+## الصفحات
+
+- `/login` — دخول الطلاب وإنشاء الحساب واستعادة كلمة المرور
+- `/` — الرئيسية، `/tasks`، `/about`، `/subject/...` — محمية بتسجيل الدخول
+- `/admin` — لوحة الأدمن (نفس واجهة الدخول). الرابط يظهر بالضغط 5 مرات على شعار الفوتر.
+
+## التشغيل محلياً
+
+```bash
+npm install
+npm run dev
+```
+
+## منح صلاحية أدمن لحساب آخر
+
+```sql
+update public.profiles set role = 'admin' where email = 'someone@example.com';
+```
+
+
+########################################################################
+FILE: jsconfig.json
+########################################################################
+
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": { "@/*": ["./src/*"] }
+  }
+}
+
+
+########################################################################
+FILE: netlify.toml
+########################################################################
+
+[build]
+  command = "npm run build"
+  publish = "out"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NEXT_TELEMETRY_DISABLED = "1"
+
+
+########################################################################
+FILE: next.config.mjs
+########################################################################
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  // موقع ثابت (Static Export): يُنتج مجلد out ويعمل على Netlify بدون سيرفر.
+  output: "export",
+  trailingSlash: true,
+  images: { unoptimized: true },
+  reactStrictMode: true,
+};
+
+export default nextConfig;
+
+
+########################################################################
+FILE: package.json
+########################################################################
+
+{
+  "name": "students-is-platform",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "npx serve out"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "next": "^14.2.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "engines": {
+    "node": ">=18.18"
+  }
+}
+
+
+########################################################################
+FILE: src/app/(platform)/about/page.js
+########################################################################
+
+"use client";
+
+import { useApp } from "@/components/AppProvider";
+
+export default function AboutPage() {
+  const { L } = useApp();
+  return (
+    <div className="container">
+      <div className="about">
+        <h2>{L("ℹ️ About the Platform", "ℹ️ حول المنصة")}</h2>
+        <br />
+        <p>
+          {L(
+            "An educational platform for organizing university courses, sheets, lectures, exams and PDF files.",
+            "منصة تعليمية لتنظيم المواد الجامعية والشيتات والمحاضرات والامتحانات وملفات PDF."
+          )}
+        </p>
+        <br />
+        <p>
+          🎓 {L("Al-Bayan University", "جامعة البيان")}
+          <br />
+          💻 {L("College of Computer Science & IT", "كلية علوم الحاسوب وتقانة المعلومات")}
+          <br />
+          🖥️ {L("Information Systems Department", "قسم نظم المعلومات")}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+
+########################################################################
+FILE: src/app/(platform)/layout.js
+########################################################################
+
+import Shell from "@/components/Shell";
+
+export default function PlatformLayout({ children }) {
+  return <Shell>{children}</Shell>;
+}
+
+
+########################################################################
+FILE: src/app/(platform)/page.js
+########################################################################
+
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useApp } from "@/components/AppProvider";
+import { SEMESTERS } from "@/data/semesters";
+import { ALL_SUBJECTS } from "@/lib/subjects";
+
+const FAV_KEY = "fav_subjects";
+
+function loadFavs() {
+  try {
+    return JSON.parse(localStorage.getItem(FAV_KEY)) || [];
+  } catch {
+    return [];
+  }
+}
+
+export default function HomePage() {
+  const { L, lang } = useApp();
+  const [semKey, setSemKey] = useState("semester3");
+  const [favs, setFavs] = useState([]);
+
+  useEffect(() => setFavs(loadFavs()), []);
+
+  const toggleFav = (name) => {
+    const list = loadFavs();
+    const i = list.indexOf(name);
+    if (i === -1) list.push(name);
+    else list.splice(i, 1);
+    try {
+      localStorage.setItem(FAV_KEY, JSON.stringify(list));
+    } catch {}
+    setFavs(list);
+  };
+
+  const sem = SEMESTERS[semKey];
+  const subjects = ALL_SUBJECTS.filter((s) => s.semester === semKey).sort(
+    (a, b) => favs.includes(b.name) - favs.includes(a.name)
+  );
+
+  return (
+    <div className="container">
+      <div className="semester-tabs">
+        <button type="button" className={"sem-btn" + (semKey === "semester3" ? " active" : "")}
+          onClick={() => setSemKey("semester3")}>
+          {L("📗 Semester 3", "📗 السمستر الثالث")}
+        </button>
+        <button type="button" className={"sem-btn" + (semKey === "semester2" ? " active" : "")}
+          onClick={() => setSemKey("semester2")}>
+          {L("📘 Semester 2", "📘 السمستر الثاني")}
+        </button>
+      </div>
+
+      <div className="title">
+        <h2>📚 {lang === "ar" ? sem.name.ar : sem.name.en}</h2>
+      </div>
+      <div className="counter">
+        <span className="mono">{subjects.length}</span> {L("Academic Subjects", "مواد دراسية")}
+      </div>
+
+      <div className="subjects">
+        {subjects.map((s) => {
+          const fav = favs.includes(s.name);
+          return (
+            <Link key={s.slug} href={`/subject/${s.slug}/`} className="subject">
+              <span
+                className={"fav-star" + (fav ? " active" : "")}
+                role="button"
+                aria-label={L("Favorite", "تفضيل")}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  toggleFav(s.name);
+                }}
+              >
+                {fav ? "⭐" : "☆"}
+              </span>
+              <div className="icon">{s.icon}</div>
+              <h3>{s.name}</h3>
+            </Link>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+
+########################################################################
+FILE: src/app/(platform)/subject/[slug]/[material]/page.js
+########################################################################
+
+import MaterialView from "@/components/MaterialView";
+import { ALL_SUBJECTS, MATERIAL_KEYS } from "@/lib/subjects";
+
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return ALL_SUBJECTS.flatMap((s) => MATERIAL_KEYS.map((material) => ({ slug: s.slug, material })));
+}
+
+export default function MaterialPage({ params }) {
+  return <MaterialView slug={params.slug} material={params.material} />;
+}
+
+
+########################################################################
+FILE: src/app/(platform)/subject/[slug]/page.js
+########################################################################
+
+import SubjectView from "@/components/SubjectView";
+import { ALL_SUBJECTS } from "@/lib/subjects";
+
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return ALL_SUBJECTS.map((s) => ({ slug: s.slug }));
+}
+
+export default function SubjectPage({ params }) {
+  return <SubjectView slug={params.slug} />;
+}
+
+
+########################################################################
+FILE: src/app/(platform)/tasks/page.js
+########################################################################
+
+"use client";
+
+import { useEffect, useState } from "react";
+import { useApp } from "@/components/AppProvider";
+
+const TASKS_KEY = "study_tasks";
+
+export default function TasksPage() {
+  const { L } = useApp();
+  const [tasks, setTasks] = useState([]);
+  const [text, setText] = useState("");
+
+  useEffect(() => {
+    try {
+      setTasks(JSON.parse(localStorage.getItem(TASKS_KEY)) || []);
+    } catch {}
+  }, []);
+
+  const save = (list) => {
+    setTasks(list);
+    try {
+      localStorage.setItem(TASKS_KEY, JSON.stringify(list));
+    } catch (e) {
+      console.error("Could not save tasks:", e);
+    }
+  };
+
+  const add = () => {
+    const v = text.trim();
+    if (!v) return;
+    save([...tasks, { text: v, done: false }]);
+    setText("");
+  };
+
+  return (
+    <div className="container">
+      <div className="title">
+        <h2>{L("📝 My Study Tasks", "📝 مهام مذاكرتي")}</h2>
+      </div>
+      <div className="task-add">
+        <input
+          type="text"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && add()}
+          placeholder={L("Write a new task...", "اكتب مهمة جديدة...")}
+        />
+        <button type="button" onClick={add}>{L("➕ Add", "➕ إضافة")}</button>
+      </div>
+      <ul className="task-list">
+        {tasks.map((t, i) => (
+          <li key={i} className={t.done ? "done" : ""}>
+            <span onClick={() => save(tasks.map((x, j) => (j === i ? { ...x, done: !x.done } : x)))}>{t.text}</span>
+            <button type="button" aria-label={L("Delete task", "حذف المهمة")}
+              onClick={() => save(tasks.filter((_, j) => j !== i))}>✕</button>
+          </li>
+        ))}
+      </ul>
+      {tasks.length === 0 && (
+        <p className="empty">{L("No tasks yet. Add your first one above 👆", "لا توجد مهام بعد. أضف أول مهمة من الأعلى 👆")}</p>
+      )}
+    </div>
+  );
+}
+
+
+########################################################################
+FILE: src/app/admin/page.js
+########################################################################
+
+"use client";
+
+import Link from "next/link";
+import LoginShell from "@/components/LoginShell";
+import LoginForm from "@/components/LoginForm";
+import AdminDashboard from "@/components/AdminDashboard";
+import { useApp } from "@/components/AppProvider";
+import { useAuth } from "@/components/AuthProvider";
+
+export default function AdminPage() {
+  const { L } = useApp();
+  const { session, loading, ready, isAdmin, recovery, signOut, user } = useAuth();
+
+  if (loading || (session && !ready)) return <div className="splash" aria-busy="true">🔐</div>;
+
+  // نفس واجهة تسجيل الدخول المستخدمة للطلاب
+  if (!session || recovery) {
+    return (
+      <LoginShell>
+        <LoginForm mode="admin" />
+      </LoginShell>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <LoginShell>
+        <div className="lg-card">
+          <div className="lg-head">
+            <h1>{L("No admin access", "لا توجد صلاحية أدمن")}</h1>
+            <p>
+              {L(
+                `${user?.email} is not an admin account. Ask the platform owner to grant access.`,
+                `الحساب ${user?.email} ليس حساب أدمن. اطلب من مالك المنصة منحك الصلاحية.`
+              )}
+            </p>
+          </div>
+          <Link href="/" className="lg-submit lg-linkbtn">{L("Back to the platform", "العودة للمنصة")}</Link>
+          <button type="button" className="lg-link strong" onClick={signOut}>{L("Sign out", "تسجيل خروج")}</button>
+        </div>
+      </LoginShell>
+    );
+  }
+
+  return <AdminDashboard />;
+}
+
+
+########################################################################
+FILE: src/app/globals.css
+########################################################################
+
+:root{
+    --navy:#173b67;
+    --navy-deep:#0f2a4a;
+    --teal:#16806a;
+    --gold:#e3b04b;
+    --bg:#f2f5fa;
+    --card:#ffffff;
+    --text:#1d2733;
+    --muted:#6b7686;
+    --line:#e3e9f2;
+    --accent:#173b67;
+    --input-bg:#ffffff;
+    --shadow:0 2px 8px rgba(23,59,103,.10);
+    --shadow-hover:0 4px 12px rgba(23,59,103,.16);
+}
+body.dark{
+    --bg:#0f141b;
+    --card:#1a212b;
+    --text:#eef2f7;
+    --muted:#9aa6b6;
+    --line:#2a3340;
+    --accent:#7db7ff;
+    --input-bg:#222b37;
+    --shadow:0 2px 8px rgba(0,0,0,.45);
+    --shadow-hover:0 4px 12px rgba(0,0,0,.55);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:auto;}
+body{
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.6;
+    transition:background .3s,color .3s;
+}
+
+/* Header */
+header{
+    position:relative;
+    overflow:hidden;
+    background:
+        radial-gradient(circle at 12% 20%,rgba(227,176,75,.22),transparent 38%),
+        radial-gradient(circle at 90% 80%,rgba(22,128,106,.35),transparent 42%),
+        linear-gradient(135deg,var(--navy-deep),var(--navy));
+    color:white;
+    text-align:center;
+    padding:56px 20px 70px;
+    border-radius:0 0 36px 36px;
+    box-shadow:0 10px 30px rgba(15,42,74,.25);
+}
+header::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image:radial-gradient(rgba(255,255,255,.07) 1px,transparent 1px);
+    background-size:22px 22px;
+    pointer-events:none;
+}
+header > *{position:relative;z-index:1;}
+header h1{
+    font-size:40px;
+    font-weight:700;
+    letter-spacing:.5px;
+    margin-bottom:16px;
+    text-shadow:0 3px 14px rgba(0,0,0,.3);
+}
+[dir=rtl] header h1{letter-spacing:0;}
+header p{margin:6px;font-size:16px;color:rgba(255,255,255,.88);}
+header p:nth-of-type(1){
+    display:inline-block;
+    background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.25);
+    padding:6px 20px;
+    border-radius:30px;
+    font-weight:600;
+    color:#fff;
+}
+
+/* Nav */
+nav{
+    position:sticky;
+    top:14px;
+    z-index:20;
+    width:fit-content;
+    max-width:calc(100% - 24px);
+    margin:-30px auto 0;
+    background:var(--card);
+    padding:8px 12px;
+    text-align:center;
+    border-radius:50px;
+    border:1px solid var(--line);
+    box-shadow:var(--shadow);
+}
+nav button, nav a{
+    background:none;
+    border:none;
+    color:var(--accent);
+    font-family:inherit;
+    font-size:15px;
+    font-weight:600;
+    margin:3px 4px;
+    padding:9px 18px;
+    border-radius:30px;
+    cursor:pointer;
+    transition:background .25s,color .25s,transform .2s;
+}
+nav button:hover, nav a:hover{background:var(--navy);color:#fff;}
+nav button:active, nav a:active{transform:scale(.96);}
+body.dark nav button:hover, body.dark nav a:hover{background:#7db7ff;color:#0f141b;}
+
+/* Search */
+.search{max-width:650px;margin:32px auto 10px;padding:0 20px;}
+.search input{
+    width:100%;
+    padding:16px 24px;
+    border:2px solid transparent;
+    border-radius:30px;
+    font-family:inherit;
+    font-size:16px;
+    background:var(--card);
+    color:var(--text);
+    box-shadow:var(--shadow);
+    outline:none;
+    transition:border-color .25s,box-shadow .25s;
+}
+.search input:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(23,59,103,.12);}
+.search input::placeholder{color:var(--muted);}
+
+/* Containers */
+.container{max-width:1150px;margin:auto;padding:35px 20px;}
+.title{text-align:center;margin-bottom:12px;}
+.title h2{color:var(--accent);font-size:28px;font-weight:700;margin-bottom:10px;}
+.title h2::after{
+    content:"";
+    display:block;
+    width:60px;
+    height:4px;
+    margin:12px auto 0;
+    border-radius:4px;
+    background:linear-gradient(90deg,var(--navy),var(--teal));
+}
+.counter{text-align:center;margin:14px 0 22px;color:var(--muted);font-size:15px;font-weight:500;}
+
+/* Semester tabs */
+.semester-tabs{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    flex-wrap:wrap;
+    width:fit-content;
+    max-width:100%;
+    margin:0 auto 26px;
+    padding:6px;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:50px;
+    box-shadow:var(--shadow);
+}
+.sem-btn{
+    background:none;
+    border:0;
+    color:var(--accent);
+    font-family:inherit;
+    font-size:15px;
+    font-weight:600;
+    padding:11px 26px;
+    border-radius:40px;
+    cursor:pointer;
+    transition:background .25s,color .25s,box-shadow .25s;
+}
+.sem-btn:hover:not(.active){background:rgba(23,59,103,.08);}
+.sem-btn.active{
+    background:linear-gradient(135deg,var(--navy),var(--teal));
+    color:#fff;
+    box-shadow:0 4px 12px rgba(23,59,103,.28);
+}
+
+/* Subjects */
+.subjects{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:24px;}
+.subject{
+    position:relative;
+    overflow:hidden;
+    background:var(--card);
+    padding:30px 20px 26px;
+    border-radius:20px;
+    border:1px solid var(--line);
+    text-align:center;
+    box-shadow:var(--shadow);
+    cursor:pointer;
+    transition:transform .3s,box-shadow .3s,border-color .3s;
+}
+.subject::before{
+    content:"";
+    position:absolute;
+    top:0;left:0;right:0;
+    height:5px;
+    background:linear-gradient(90deg,var(--navy),var(--teal));
+    opacity:.85;
+}
+.subject:hover{transform:translateY(-6px);box-shadow:var(--shadow-hover);border-color:var(--accent);}
+.icon,.material-icon{
+    width:78px;height:78px;
+    margin:0 auto 16px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:38px;
+    border-radius:22px;
+    background:linear-gradient(135deg,rgba(23,59,103,.10),rgba(22,128,106,.12));
+}
+.subject h3{color:var(--accent);font-size:17px;font-weight:600;margin-bottom:10px;}
+.fav-star{
+    position:absolute;
+    top:14px;
+    inset-inline-end:14px;
+    font-size:20px;
+    cursor:pointer;
+    opacity:.4;
+    z-index:2;
+    transition:opacity .2s,transform .2s;
+}
+.fav-star:hover{transform:scale(1.2);}
+.fav-star.active{opacity:1;}
+
+/* Buttons */
+.back{
+    background:var(--navy);
+    color:white;
+    border:0;
+    padding:12px 24px;
+    border-radius:12px;
+    font-family:inherit;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    margin-bottom:25px;
+    box-shadow:0 4px 12px rgba(23,59,103,.25);
+    transition:transform .2s,box-shadow .2s;
+}
+.back:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(23,59,103,.32);}
+
+.subject-title{
+    background:var(--card);
+    text-align:center;
+    padding:30px;
+    border-radius:20px;
+    border:1px solid var(--line);
+    border-inline-start:6px solid var(--teal);
+    box-shadow:var(--shadow);
+    margin-bottom:30px;
+}
+.subject-title h2{color:var(--accent);font-size:26px;}
+
+/* Exam card */
+.exam-card{
+    background:var(--card);
+    padding:16px 20px;
+    border-radius:16px;
+    border:1px solid var(--line);
+    box-shadow:var(--shadow);
+    margin-bottom:26px;
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:10px;
+}
+.exam-card span{flex:1;min-width:170px;font-weight:600;}
+.exam-card.urgent{border-color:#c0392b;}
+.exam-card.urgent span{color:#c0392b;}
+.exam-card input[type=date]{
+    padding:9px 12px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:var(--input-bg);
+    color:var(--text);
+    font-family:inherit;
+}
+.exam-card button{
+    background:var(--navy);
+    color:#fff;
+    border:0;
+    padding:9px 18px;
+    border-radius:10px;
+    font-family:inherit;
+    font-weight:600;
+    cursor:pointer;
+}
+.exam-card .clear-btn{background:#7b8794;}
+
+/* Materials */
+.materials{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px;}
+.material{
+    background:var(--card);
+    padding:32px 24px;
+    border-radius:20px;
+    border:1px solid var(--line);
+    text-align:center;
+    box-shadow:var(--shadow);
+    cursor:pointer;
+    transition:transform .3s,box-shadow .3s,border-color .3s;
+}
+.material:hover{transform:translateY(-6px);box-shadow:var(--shadow-hover);border-color:var(--accent);}
+.material h3{color:var(--accent);margin-bottom:8px;}
+.material p{color:var(--muted);font-size:14px;}
+
+/* Upload card */
+.upload-card{
+    background:var(--card);
+    padding:22px;
+    border-radius:18px;
+    border:1px solid var(--line);
+    box-shadow:var(--shadow);
+    margin-bottom:22px;
+    text-align:center;
+}
+.upload-card h3{color:var(--accent);margin-bottom:14px;font-size:17px;}
+.upload-card input[type=file]{
+    display:block;
+    width:100%;
+    margin-bottom:12px;
+    font-family:inherit;
+    font-size:14px;
+    color:var(--text);
+}
+.upload-card button{
+    background:var(--navy);
+    color:#fff;
+    border:0;
+    padding:10px 26px;
+    border-radius:10px;
+    font-family:inherit;
+    font-weight:600;
+    cursor:pointer;
+}
+.upload-card button:hover{background:var(--teal);}
+.upload-card button:disabled{opacity:.6;cursor:not-allowed;}
+.msg.show{display:block;}
+.msg{
+    margin:12px auto 0;
+    max-width:650px;
+    padding:11px 16px;
+    border-radius:12px;
+    background:#e8f5e9;
+    color:#1b5e20;
+    text-align:center;
+    display:none;
+}
+.msg.err{background:#fdecea;color:#b71c1c;}
+
+.file-search{
+    width:100%;
+    padding:13px 18px;
+    border-radius:12px;
+    border:1px solid var(--line);
+    background:var(--card);
+    color:var(--text);
+    font-family:inherit;
+    font-size:15px;
+    margin-bottom:16px;
+    outline:none;
+}
+.file-search:focus{border-color:var(--accent);}
+
+/* Files */
+.file-list{display:grid;gap:14px;}
+.file{
+    background:var(--card);
+    padding:18px 22px;
+    border-radius:14px;
+    border:1px solid var(--line);
+    border-inline-start:4px solid var(--navy);
+    box-shadow:0 3px 12px rgba(23,59,103,.08);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    transition:transform .25s,box-shadow .25s;
+}
+.file:hover{transform:translateX(4px);box-shadow:var(--shadow);}
+[dir=rtl] .file:hover{transform:translateX(-4px);}
+.file span{font-weight:500;word-break:break-word;}
+.file button{
+    background:var(--navy);
+    color:white;
+    border:0;
+    padding:10px 24px;
+    border-radius:10px;
+    font-family:inherit;
+    font-weight:600;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:background .25s,transform .2s;
+}
+.file button:hover{background:var(--teal);transform:scale(1.05);}
+.empty{
+    background:var(--card);
+    padding:34px;
+    text-align:center;
+    border-radius:16px;
+    border:2px dashed var(--line);
+    color:var(--muted);
+}
+
+/* MCQ table */
+.mcq-wrap{overflow-x:auto;}
+.mcq-table{
+    width:100%;
+    border-collapse:separate;
+    border-spacing:0;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:var(--shadow);
+}
+.mcq-table th,.mcq-table td{
+    padding:15px;
+    border-bottom:1px solid var(--line);
+    text-align:start;
+    vertical-align:top;
+}
+.mcq-table tbody tr:last-child td{border-bottom:0;}
+.mcq-table th{background:linear-gradient(135deg,var(--navy-deep),var(--navy));color:#fff;font-weight:600;}
+.option-btn{
+    display:block;
+    width:100%;
+    padding:10px 14px;
+    margin:6px 0;
+    border:1px solid var(--line);
+    border-radius:10px;
+    background:var(--input-bg);
+    color:var(--text);
+    cursor:pointer;
+    text-align:start;
+    font-family:inherit;
+    font-size:14px;
+    transition:background .2s,border-color .2s;
+}
+.option-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(23,59,103,.06);}
+.option-btn.correct{background:#d4edda;color:#155724;border-color:#c3e6cb;}
+.option-btn.wrong{background:#f8d7da;color:#721c24;border-color:#f5c6cb;}
+.option-btn:disabled{cursor:default;}
+
+/* Tasks */
+.task-add{display:flex;gap:10px;margin-bottom:20px;}
+.task-add input{
+    flex:1;
+    padding:14px 18px;
+    border-radius:14px;
+    border:1px solid var(--line);
+    background:var(--card);
+    color:var(--text);
+    font-family:inherit;
+    font-size:15px;
+    outline:none;
+}
+.task-add input:focus{border-color:var(--accent);}
+.task-add button{
+    background:var(--navy);
+    color:#fff;
+    border:0;
+    padding:12px 22px;
+    border-radius:14px;
+    font-family:inherit;
+    font-weight:600;
+    cursor:pointer;
+}
+.task-add button:hover{background:var(--teal);}
+.task-list{list-style:none;display:grid;gap:12px;margin-bottom:16px;}
+.task-list li{
+    background:var(--card);
+    padding:15px 18px;
+    border-radius:14px;
+    border:1px solid var(--line);
+    border-inline-start:4px solid var(--teal);
+    box-shadow:0 3px 12px rgba(23,59,103,.08);
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+.task-list li.done span{text-decoration:line-through;color:var(--muted);}
+.task-list li span{flex:1;cursor:pointer;word-break:break-word;}
+.task-list li button{
+    background:#c0392b;
+    color:#fff;
+    border:0;
+    width:30px;height:30px;
+    border-radius:50%;
+    cursor:pointer;
+    font-size:14px;
+}
+
+/* About */
+.about{
+    background:var(--card);
+    padding:42px 35px;
+    border-radius:22px;
+    border:1px solid var(--line);
+    text-align:center;
+    box-shadow:var(--shadow);
+    line-height:1.9;
+}
+.about h2{color:var(--accent);font-size:28px;}
+
+/* Footer */
+footer{
+    position:relative;
+    margin-top:60px;
+    background:linear-gradient(135deg,var(--navy-deep),var(--navy));
+    color:white;
+    text-align:center;
+    padding:42px 20px 28px;
+    border-radius:36px 36px 0 0;
+}
+footer::before{
+    content:"";
+    display:block;
+    width:70px;height:4px;
+    margin:0 auto 22px;
+    border-radius:4px;
+    background:linear-gradient(90deg,var(--gold),var(--teal));
+}
+footer p{margin:7px;color:rgba(255,255,255,.88);}
+footer > p:first-of-type{font-size:19px;font-weight:700;color:#fff;}
+footer .contact{font-weight:600;letter-spacing:.3px;line-height:2;}
+footer .credits{
+    max-width:520px;
+    margin:22px auto 8px;
+    padding:18px 22px;
+    background:rgba(255,255,255,.09);
+    border:1px solid rgba(255,255,255,.22);
+    border-radius:18px;
+}
+footer .credits .label{display:block;font-size:14px;color:var(--gold);font-weight:600;margin-bottom:6px;}
+footer .credits .names{
+    display:block;
+    font-size:22px;
+    font-weight:800;
+    color:#fff;
+    letter-spacing:0;
+}
+footer .credits .names i{font-style:normal;color:var(--gold);margin:0 8px;}
+.admin-link{display:inline-block;margin-top:10px;color:#9ec8ff;font-size:13px;}
+
+/* No movement animations (lighter scrolling on phones) */
+*{transition:none !important;}
+.subject:hover,.material:hover,.file:hover,.back:hover,.file button:hover,.fav-star:hover,nav button:active, nav a:active{transform:none !important;}
+
+/* Accessibility */
+button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:2px;}
+@media (prefers-reduced-motion:reduce){
+    *{transition:none !important;scroll-behavior:auto !important;}
+}
+
+/* Mobile */
+@media(max-width:600px){
+    header{padding:42px 16px 60px;border-radius:0 0 28px 28px;}
+    header h1{font-size:27px;}
+    nav{border-radius:26px;padding:6px;}
+    nav button, nav a{display:inline-block;margin:3px;padding:8px 12px;font-size:14px;}
+    .file{flex-direction:column;text-align:center;}
+    .file button{width:100%;}
+    .sem-btn{padding:10px 16px;font-size:14px;}
+    footer{border-radius:28px 28px 0 0;}
+    footer .credits .names{font-size:19px;}
+}
+
+/* ================================================================
+   الخطوط
+   English : Inter = الأساسي · Sora = العناوين والنصوص البارزة · JetBrains Mono = الأكواد والأرقام
+   العربي  : Amiri Bold = العناوين · IBM Plex Sans Arabic Regular = النص · Cairo SemiBold = الواجهة
+   ================================================================ */
+:root{
+    --ff-body:var(--f-inter),var(--f-plex),system-ui,sans-serif;
+    --ff-head:var(--f-sora),var(--f-inter),var(--f-amiri),sans-serif;
+    --ff-mono:var(--f-mono),ui-monospace,SFMono-Regular,Menlo,monospace;
+    --ff-ar-body:var(--f-plex),var(--f-inter),system-ui,sans-serif;
+    --ff-ar-head:var(--f-amiri),var(--f-plex),serif;
+    --ff-ar-ui:var(--f-cairo),var(--f-plex),sans-serif;
+}
+body{font-family:var(--ff-body);}
+h1,h2,h3,header p,footer > p:first-of-type,.counter{font-family:var(--ff-head);}
+button,input,select,textarea{font-family:inherit;}
+.mono,code,kbd{font-family:var(--ff-mono);font-variant-numeric:tabular-nums;}
+
+[dir=rtl] body{font-family:var(--ff-ar-body);}
+[dir=rtl] h1,[dir=rtl] h2,[dir=rtl] h3{font-family:var(--ff-ar-head);font-weight:700;line-height:1.6;}
+[dir=rtl] header p,[dir=rtl] footer > p:first-of-type,[dir=rtl] .counter{font-family:var(--ff-ar-body);}
+[dir=rtl] button,[dir=rtl] nav a,[dir=rtl] a.back,[dir=rtl] label,
+[dir=rtl] .exam-card span,[dir=rtl] .file span,[dir=rtl] .lg-submit,[dir=rtl] .lg-link,
+[dir=rtl] .lg-lang,[dir=rtl] .ad-btn{font-family:var(--ff-ar-ui);font-weight:600;}
+[dir=rtl] .option-btn,[dir=rtl] input,[dir=rtl] .gs-item,[dir=rtl] .msg,[dir=rtl] .lg-msg{font-family:var(--ff-ar-body);font-weight:400;}
+[dir=rtl] .mono,[dir=rtl] code{font-family:var(--ff-mono);}
+[dir=rtl] .gs-item b{font-family:var(--ff-ar-ui);font-weight:600;}
+
+/* روابط بنفس شكل البطاقات والأزرار القديمة */
+a.subject,a.material{display:block;text-decoration:none;color:inherit;}
+a.back{display:inline-block;text-decoration:none;}
+nav a{display:inline-block;color:var(--accent);font-size:15px;font-weight:600;text-decoration:none;}
+nav a.active{background:var(--navy);color:#fff;}
+body.dark nav a.active{background:#7db7ff;color:#0f141b;}
+.splash{min-height:100vh;display:flex;align-items:center;justify-content:center;font-size:48px;background:var(--bg);}
+
+/* ================= البحث التلقائي ================= */
+.search{position:relative;}
+.search input[type=search]{-webkit-appearance:none;appearance:none;}
+.gs-list{
+    position:absolute;
+    inset-inline:20px;
+    top:100%;
+    margin-top:6px;
+    list-style:none;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:16px;
+    box-shadow:var(--shadow-hover);
+    z-index:30;
+    overflow-y:auto;
+    max-height:60vh;
+}
+.gs-item{display:flex;align-items:center;gap:12px;padding:11px 16px;cursor:pointer;}
+.gs-item.active{background:rgba(23,59,103,.08);}
+body.dark .gs-item.active{background:rgba(125,183,255,.14);}
+.gs-ico{font-size:22px;width:34px;text-align:center;flex:none;}
+.gs-text{display:flex;flex-direction:column;min-width:0;}
+.gs-text b{font-weight:600;color:var(--text);overflow-wrap:anywhere;}
+.gs-text small{color:var(--muted);font-size:12.5px;}
+.gs-empty{padding:16px;text-align:center;color:var(--muted);}
+
+/* ================= واجهة تسجيل الدخول (طلاب + أدمن) ================= */
+.lg-page{
+    min-height:100vh;min-height:100dvh;
+    display:flex;align-items:center;justify-content:center;
+    padding:24px;position:relative;
+    background:
+        radial-gradient(circle at 15% 8%,#3B6BE8 0%,rgba(59,107,232,0) 45%),
+        radial-gradient(circle at 90% 95%,#2A4FC4 0%,rgba(42,79,196,0) 50%),
+        #0A1A44;
+}
+.lg-wrap{width:100%;max-width:420px;}
+.lg-lang{
+    position:absolute;top:16px;inset-inline-end:16px;
+    background:rgba(255,255,255,.14);color:#fff;
+    border:1px solid rgba(255,255,255,.3);border-radius:30px;
+    padding:8px 16px;font-weight:600;font-size:14px;cursor:pointer;
+}
+.lg-card{
+    box-sizing:border-box;padding:28px 24px;border-radius:28px;
+    background:rgba(246,244,238,.97);
+    display:flex;flex-direction:column;gap:22px;
+    box-shadow:0 24px 60px rgba(4,12,40,.45);color:#0B1B3A;
+}
+.lg-brand{display:flex;align-items:center;gap:12px;}
+.lg-logo{width:48px;height:48px;border-radius:14px;background:#1D4ED8;display:flex;align-items:center;justify-content:center;flex:none;}
+.lg-brand-text{display:flex;flex-direction:column;gap:2px;}
+.lg-brand-name{font-family:var(--ff-head);font-size:20px;font-weight:800;color:#0B1B3A;letter-spacing:-.3px;}
+.lg-brand-sub{font-size:12px;font-weight:500;color:#4A5878;}
+.lg-head{display:flex;flex-direction:column;gap:6px;}
+.lg-head h1{margin:0;font-size:30px;font-weight:800;color:#0B1B3A;letter-spacing:-.6px;line-height:1.2;}
+[dir=rtl] .lg-head h1{letter-spacing:0;font-size:32px;}
+.lg-head p{margin:0;font-size:15px;color:#4A5878;}
+.lg-form{display:flex;flex-direction:column;gap:16px;}
+.lg-field{display:flex;flex-direction:column;gap:8px;}
+.lg-field label{font-size:13px;font-weight:700;color:#0B1B3A;}
+.lg-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.lg-input{position:relative;}
+.lg-ico{position:absolute;inset-inline-start:14px;top:16px;pointer-events:none;}
+.lg-input input{
+    box-sizing:border-box;width:100%;height:52px;
+    padding-inline:44px 14px;
+    border:1.5px solid #C5CFE8;border-radius:14px;background:#fff;
+    font-size:15px;color:#0B1B3A;
+}
+.lg-input input.lg-pw{padding-inline-end:48px;}
+.lg-input input:focus{outline:2px solid #1D4ED8;outline-offset:1px;}
+.lg-input input::placeholder{color:#5B6785;opacity:1;}
+.lg-eye{
+    position:absolute;inset-inline-end:4px;top:4px;width:44px;height:44px;
+    border:0;background:transparent;border-radius:12px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+}
+.lg-submit{
+    height:54px;border:0;border-radius:14px;background:#1D4ED8;color:#fff;
+    font-size:16px;font-weight:700;cursor:pointer;margin-top:4px;
+    display:flex;align-items:center;justify-content:center;text-decoration:none;
+}
+.lg-submit:hover{background:#1E40AF;}
+.lg-submit:disabled{opacity:.65;cursor:wait;}
+.lg-linkbtn{margin-top:0;}
+.lg-link{background:none;border:0;padding:0;color:#1D4ED8;font-size:13px;font-weight:700;cursor:pointer;}
+.lg-link:hover{color:#1E3A8A;}
+.lg-link.strong{font-size:14px;}
+.lg-or{display:flex;align-items:center;gap:12px;}
+.lg-or span{flex:1;height:1px;background:#C5CFE8;}
+.lg-or em{font-style:normal;font-size:13px;color:#4A5878;}
+.lg-switch{text-align:center;font-size:14px;color:#4A5878;}
+.lg-msg{padding:11px 14px;border-radius:12px;font-size:14px;line-height:1.6;}
+.lg-msg.err{background:#FDECEA;color:#B71C1C;}
+.lg-msg.ok{background:#E8F5E9;color:#1B5E20;}
+.lg-card button:focus-visible,.lg-card input:focus-visible,.lg-card a:focus-visible{outline:3px solid #1D4ED8;outline-offset:2px;}
+
+/* ================= لوحة الأدمن ================= */
+.ad-page{min-height:100vh;}
+.ad-header{
+    background:linear-gradient(135deg,var(--navy-deep),var(--navy));
+    color:#fff;text-align:center;padding:34px 20px 40px;border-radius:0 0 28px 28px;
+}
+.ad-header h1{font-size:28px;}
+.ad-container{max-width:900px;}
+.ad-top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.ad-top-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.ad-btn{
+    background:var(--navy);color:#fff;border:0;border-radius:10px;padding:9px 18px;
+    font-weight:600;font-size:14px;cursor:pointer;text-decoration:none;display:inline-block;
+}
+.ad-btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--line);}
+.ad-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:6px;}
+.ad-stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;text-align:center;box-shadow:var(--shadow);}
+.ad-stat .num{font-size:34px;font-weight:700;color:var(--accent);}
+.ad-stat.pending{border-top:4px solid var(--gold);}
+.ad-stat.approved{border-top:4px solid var(--teal);}
+.ad-stat.students{border-top:4px solid var(--navy);}
+.ad-section{color:var(--accent);margin:32px 0 14px;font-size:22px;}
+.ad-card{
+    background:var(--card);border:1px solid var(--line);border-inline-start:4px solid var(--navy);
+    border-radius:14px;padding:16px 20px;margin-bottom:12px;box-shadow:var(--shadow);
+    display:flex;flex-direction:column;gap:6px;
+}
+.ad-meta{color:var(--muted);font-size:13.5px;}
+.ad-name{font-weight:600;overflow-wrap:anywhere;}
+.ad-card a{color:var(--accent);font-weight:600;font-size:14px;}
+.ad-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
+.ad-actions button{border:0;border-radius:10px;padding:9px 18px;color:#fff;font-weight:600;cursor:pointer;}
+.ad-actions .approve{background:var(--teal);}
+.ad-actions .reject{background:#c0392b;}
+.ad-students{display:grid;gap:10px;}
+.ad-student{
+    background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;
+    display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;
+}
+.ad-student span{color:var(--muted);font-size:14px;overflow-wrap:anywhere;}
+.ad-student em{font-style:normal;font-size:12px;font-weight:700;background:var(--gold);color:#3a2a00;padding:2px 10px;border-radius:20px;}
+.ad-note{color:var(--muted);font-size:13.5px;margin-top:10px;text-align:center;}
+
+
+########################################################################
+FILE: src/app/layout.js
+########################################################################
+
+import { Inter, Sora, JetBrains_Mono, Amiri, IBM_Plex_Sans_Arabic, Cairo } from "next/font/google";
+import { AppProvider } from "@/components/AppProvider";
+import { AuthProvider } from "@/components/AuthProvider";
+import "./globals.css";
+
+// الخطوط الإنجليزية: Inter (أساسي) · Sora (العناوين) · JetBrains Mono (الأكواد والأرقام)
+const inter = Inter({ subsets: ["latin"], variable: "--f-inter", display: "swap" });
+const sora = Sora({ subsets: ["latin"], variable: "--f-sora", display: "swap" });
+const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--f-mono", display: "swap" });
+
+// الخطوط العربية: Amiri Bold (العناوين) · IBM Plex Sans Arabic Regular (النص) · Cairo SemiBold (الواجهة)
+const amiri = Amiri({ subsets: ["arabic", "latin"], weight: ["400", "700"], variable: "--f-amiri", display: "swap" });
+const plex = IBM_Plex_Sans_Arabic({ subsets: ["arabic", "latin"], weight: ["400"], variable: "--f-plex", display: "swap" });
+const cairo = Cairo({ subsets: ["arabic", "latin"], variable: "--f-cairo", display: "swap" }); // خط متغيّر: نستخدم الوزن 600 (SemiBold) من CSS
+
+export const metadata = {
+  title: "Students IS Education Platform",
+  description: "منصة تعليمية لتنظيم المواد الجامعية والشيتات والمحاضرات والامتحانات - جامعة البيان، قسم نظم المعلومات",
+};
+
+export default function RootLayout({ children }) {
+  const fonts = [inter, sora, mono, amiri, plex, cairo].map((f) => f.variable).join(" ");
+  return (
+    <html lang="en" dir="ltr" className={fonts} suppressHydrationWarning>
+      <body>
+        <AppProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </AppProvider>
+      </body>
+    </html>
+  );
+}
+
+
+########################################################################
+FILE: src/app/login/page.js
+########################################################################
+
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import LoginShell from "@/components/LoginShell";
+import LoginForm from "@/components/LoginForm";
+import { useAuth } from "@/components/AuthProvider";
+
+export default function LoginPage() {
+  const { session, loading, recovery } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && session && !recovery) router.replace("/");
+  }, [loading, session, recovery, router]);
+
+  return (
+    <LoginShell>
+      <LoginForm mode="student" />
+    </LoginShell>
+  );
+}
+
+
+########################################################################
+FILE: src/components/AdminDashboard.js
+########################################################################
+
+"use client";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { useApp } from "./AppProvider";
+import { useAuth } from "./AuthProvider";
+import { supabase, BUCKET } from "@/lib/supabase";
+import { fuzzySearch } from "@/lib/search";
+
+/** رابط التخزين العام -> مسار الملف داخل الـ bucket */
+function storagePathFromUrl(url) {
+  const marker = "/storage/v1/object/public/" + BUCKET + "/";
+  const s = String(url || "");
+  const i = s.indexOf(marker);
+  if (i === -1) return null;
+  try {
+    return decodeURIComponent(s.slice(i + marker.length).split("?")[0]);
+  } catch {
+    return null;
+  }
+}
+
+export default function AdminDashboard() {
+  const { L, lang, toggleLang } = useApp();
+  const { displayName, user, signOut } = useAuth();
+
+  const [stats, setStats] = useState(null);
+  const [pending, setPending] = useState(null);
+  const [approved, setApproved] = useState(null);
+  const [students, setStudents] = useState(null);
+  const [studentQ, setStudentQ] = useState("");
+  const [flashMsg, setFlashMsg] = useState("");
+
+  const flash = (text) => {
+    setFlashMsg(text);
+    setTimeout(() => setFlashMsg(""), 8000);
+  };
+
+  const loadAll = useCallback(async () => {
+    const [p, a, ps, as] = await Promise.all([
+      supabase.from("submissions").select("*").eq("approved", false).order("created_at", { ascending: false }),
+      supabase.from("submissions").select("*").eq("approved", true).order("created_at", { ascending: false }).limit(200),
+      supabase.from("submissions").select("id", { count: "exact", head: true }).eq("approved", false),
+      supabase.from("submissions").select("id", { count: "exact", head: true }).eq("approved", true),
+    ]);
+    setPending(p.error ? "error" : p.data || []);
+    setApproved(a.error ? "error" : a.data || []);
+    setStats(ps.error || as.error ? null : { pending: ps.count ?? 0, approved: as.count ?? 0 });
+  }, []);
+
+  const loadStudents = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id,full_name,email,role,created_at")
+      .order("created_at", { ascending: false })
+      .limit(1000);
+    setStudents(error ? "error" : data || []);
+  }, []);
+
+  useEffect(() => {
+    loadAll();
+    loadStudents();
+  }, [loadAll, loadStudents]);
+
+  const approve = async (id) => {
+    const { error } = await supabase.from("submissions").update({ approved: true }).eq("id", id);
+    if (error) {
+      console.error(error);
+      alert(L("Could not approve the file.", "تعذرت الموافقة."));
+      return;
+    }
+    loadAll();
+  };
+
+  const remove = async (row) => {
+    if (!confirm(L("Delete this file permanently?", "حذف هذا الملف نهائياً؟"))) return;
+    let note = "";
+    const filePath = storagePathFromUrl(row.path);
+    if (filePath) {
+      const { data, error } = await supabase.storage.from(BUCKET).remove([filePath]);
+      if (error) {
+        console.error(error);
+        note = L("Could not delete the file from storage. Check the storage delete policy.", "تعذر حذف الملف من التخزين، تحقق من صلاحية الحذف على Storage.");
+      } else if (!data || !data.length) {
+        note = L("File not found in storage (already deleted, or no delete permission).", "لم يُعثر على الملف في التخزين (ربما حُذف مسبقاً أو لا توجد صلاحية حذف).");
+      }
+    }
+    const { error: dbErr } = await supabase.from("submissions").delete().eq("id", row.id);
+    if (dbErr) {
+      console.error(dbErr);
+      alert(L("Could not delete.", "تعذر الحذف."));
+      return;
+    }
+    if (note) flash(L("Record deleted. ", "تم حذف السجل من المنصة. ") + note);
+    loadAll();
+  };
+
+  // البحث التلقائي عن الطلاب: يتحمل الأخطاء الإملائية، ويظهر للأدمن فقط
+  const shownStudents = useMemo(() => {
+    if (!Array.isArray(students)) return [];
+    if (!studentQ.trim()) return students.slice(0, 50);
+    return fuzzySearch(students, studentQ, (s) => [s.full_name, s.email], 50);
+  }, [students, studentQ]);
+
+  const empty = (t) => <div className="empty">{t}</div>;
+
+  return (
+    <div className="ad-page">
+      <header className="ad-header">
+        <h1>{L("🔐 Platform control panel", "🔐 لوحة تحكم المنصة")}</h1>
+      </header>
+
+      <div className="container ad-container">
+        <div className="ad-top">
+          <span>👋 {displayName || user?.email}</span>
+          <div className="ad-top-actions">
+            <Link href="/" className="ad-btn ghost">{L("Platform", "المنصة")}</Link>
+            <button type="button" className="ad-btn ghost" onClick={toggleLang}>{lang === "ar" ? "English" : "عربي"}</button>
+            <button type="button" className="ad-btn" onClick={signOut}>{L("Sign out", "تسجيل خروج")}</button>
+          </div>
+        </div>
+
+        {flashMsg && <div className="msg show">{flashMsg}</div>}
+
+        <div className="ad-stats">
+          <div className="ad-stat pending">
+            <div className="num mono">{stats ? stats.pending : "–"}</div>
+            <div>{L("⏳ Pending review", "⏳ بانتظار المراجعة")}</div>
+          </div>
+          <div className="ad-stat approved">
+            <div className="num mono">{stats ? stats.approved : "–"}</div>
+            <div>{L("✅ Approved", "✅ موافق عليها")}</div>
+          </div>
+          <div className="ad-stat students">
+            <div className="num mono">{Array.isArray(students) ? students.length : "–"}</div>
+            <div>{L("🎓 Students", "🎓 الطلاب")}</div>
+          </div>
+        </div>
+
+        <h2 className="ad-section">{L("⏳ Pending review", "⏳ بانتظار المراجعة")}</h2>
+        {pending === null && empty(L("Loading...", "جارٍ التحميل..."))}
+        {pending === "error" && empty(L("Could not load files. Make sure the submissions table exists and your account is an admin.", "تعذر تحميل الملفات. تأكد أن جدول submissions موجود وأن حسابك أدمن."))}
+        {Array.isArray(pending) && pending.length === 0 && empty(L("📭 No files waiting for review.", "📭 لا توجد ملفات بانتظار المراجعة."))}
+        {Array.isArray(pending) && pending.map((row) => (
+          <div className="ad-card" key={row.id}>
+            <div className="ad-meta">{row.subject} ← {row.material}</div>
+            <div className="ad-name">📄 {row.name}</div>
+            <a href={encodeURI(row.path)} target="_blank" rel="noopener noreferrer">{L("Preview file", "معاينة الملف")}</a>
+            <div className="ad-actions">
+              <button type="button" className="approve" onClick={() => approve(row.id)}>{L("✅ Approve", "✅ موافقة")}</button>
+              <button type="button" className="reject" onClick={() => remove(row)}>{L("❌ Reject", "❌ رفض")}</button>
+            </div>
+          </div>
+        ))}
+
+        <h2 className="ad-section">{L("✅ Approved files", "✅ الملفات المعتمدة")}</h2>
+        {approved === null && empty(L("Loading...", "جارٍ التحميل..."))}
+        {approved === "error" && empty(L("Could not load approved files.", "تعذر تحميل الملفات المعتمدة."))}
+        {Array.isArray(approved) && approved.length === 0 && empty(L("No approved files yet.", "لا توجد ملفات معتمدة بعد."))}
+        {Array.isArray(approved) && approved.map((row) => (
+          <div className="ad-card" key={row.id}>
+            <div className="ad-meta">{row.subject} ← {row.material}</div>
+            <div className="ad-name">📄 {row.name}</div>
+            <a href={encodeURI(row.path)} target="_blank" rel="noopener noreferrer">{L("Preview file", "معاينة الملف")}</a>
+            <div className="ad-actions">
+              <button type="button" className="reject" onClick={() => remove(row)}>{L("🗑️ Delete permanently", "🗑️ حذف نهائي")}</button>
+            </div>
+          </div>
+        ))}
+
+        <h2 className="ad-section">{L("🎓 Students", "🎓 الطلاب")}</h2>
+        <input
+          type="search"
+          className="file-search"
+          value={studentQ}
+          onChange={(e) => setStudentQ(e.target.value)}
+          placeholder={L("🔎 Search a student by name or email...", "🔎 ابحث عن طالب بالاسم أو البريد...")}
+        />
+        {students === null && empty(L("Loading...", "جارٍ التحميل..."))}
+        {students === "error" && empty(L("Could not load students. Run supabase/schema.sql and make sure your account is an admin.", "تعذر تحميل الطلاب. شغّل ملف supabase/schema.sql وتأكد أن حسابك أدمن."))}
+        {Array.isArray(students) && shownStudents.length === 0 && empty(L("No students match.", "لا يوجد طلاب مطابقون."))}
+        <div className="ad-students">
+          {shownStudents.map((s) => (
+            <div className="ad-student" key={s.id}>
+              <b>{s.full_name || L("(no name)", "(بدون اسم)")}</b>
+              <span dir="ltr">{s.email}</span>
+              {s.role === "admin" && <em>{L("Admin", "أدمن")}</em>}
+            </div>
+          ))}
+        </div>
+        {Array.isArray(students) && !studentQ.trim() && students.length > 50 && (
+          <p className="ad-note">{L("Showing the latest 50. Type to search all students.", "يعرض آخر 50 طالباً. اكتب للبحث في الجميع.")}</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+########################################################################
+FILE: src/components/AppProvider.js
+########################################################################
+
+"use client";
+
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
+
+const Ctx = createContext(null);
+const LANG_KEY = "students_is_lang";
+const DARK_KEY = "students_is_dark_mode";
+
+export function AppProvider({ children }) {
+  const [lang, setLang] = useState("en");
+  const [dark, setDark] = useState(false);
+
+  useEffect(() => {
+    try {
+      const l = localStorage.getItem(LANG_KEY);
+      if (l === "ar" || l === "en") setLang(l);
+      setDark(localStorage.getItem(DARK_KEY) === "1");
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+  }, [lang]);
+
+  useEffect(() => {
+    document.body.classList.toggle("dark", dark);
+  }, [dark]);
+
+  const toggleLang = () => {
+    const next = lang === "en" ? "ar" : "en";
+    setLang(next);
+    try {
+      localStorage.setItem(LANG_KEY, next);
+    } catch {}
+  };
+  const toggleDark = () => {
+    const next = !dark;
+    setDark(next);
+    try {
+      localStorage.setItem(DARK_KEY, next ? "1" : "0");
+    } catch {}
+  };
+
+  // L("English text", "النص العربي")
+  const L = useCallback((en, ar) => (lang === "ar" ? ar : en), [lang]);
+
+  return <Ctx.Provider value={{ lang, dark, toggleLang, toggleDark, L }}>{children}</Ctx.Provider>;
+}
+
+export const useApp = () => useContext(Ctx);
+
+
+########################################################################
+FILE: src/components/AuthProvider.js
+########################################################################
+
+"use client";
+
+import { createContext, useContext, useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+
+const Ctx = createContext(null);
+
+export function AuthProvider({ children }) {
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [recovery, setRecovery] = useState(false);
+  // undefined = قيد التحميل، null = لا يوجد ملف شخصي
+  const [profile, setProfile] = useState(undefined);
+
+  useEffect(() => {
+    let alive = true;
+    supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        if (alive) setSession(data.session || null);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
+    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
+      setSession(s || null);
+      if (event === "PASSWORD_RECOVERY") setRecovery(true);
+      if (event === "SIGNED_OUT") setRecovery(false);
+    });
+    return () => {
+      alive = false;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
+
+  const uid = session?.user?.id;
+  useEffect(() => {
+    if (!uid) {
+      setProfile(undefined);
+      return;
+    }
+    let alive = true;
+    setProfile(undefined);
+    supabase
+      .from("profiles")
+      .select("full_name,email,role")
+      .eq("id", uid)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (alive) setProfile(error ? null : data || null);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [uid]);
+
+  const user = session?.user || null;
+  const value = {
+    session,
+    user,
+    profile,
+    loading,
+    recovery,
+    ready: !loading && (!session || profile !== undefined),
+    isAdmin: profile?.role === "admin",
+    displayName: profile?.full_name || user?.user_metadata?.full_name || user?.email || "",
+    signIn: (email, password) => supabase.auth.signInWithPassword({ email, password }),
+    signUp: (name, email, password) =>
+      supabase.auth.signUp({ email, password, options: { data: { full_name: name } } }),
+    signOut: () => supabase.auth.signOut(),
+    sendReset: (email) =>
+      supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + "/login/" }),
+    setNewPassword: async (password) => {
+      const res = await supabase.auth.updateUser({ password });
+      if (!res.error) setRecovery(false);
+      return res;
+    },
+  };
+
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+}
+
+export const useAuth = () => useContext(Ctx);
+
+
+########################################################################
+FILE: src/components/GlobalSearch.js
+########################################################################
+
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useApp } from "./AppProvider";
+import { ALL_SUBJECTS } from "@/lib/subjects";
+import { STATIC } from "@/data/files";
+import { fuzzySearch } from "@/lib/search";
+import { buildFileIndex } from "@/lib/files";
+
+const subjectItems = ALL_SUBJECTS.map((s) => ({ type: "subject", ...s }));
+const staticFileItems = ALL_SUBJECTS.flatMap((s) =>
+  Object.entries(STATIC[s.name] || {}).flatMap(([material, files]) =>
+    files.map((f) => ({ type: "file", name: f.name, url: f.url, subject: s.name, slug: s.slug, icon: s.icon, material }))
+  )
+);
+
+/** بحث تلقائي: المواد + المحاضرات/الشيتات + الامتحانات، يتحمّل الأخطاء الإملائية */
+export default function GlobalSearch() {
+  const { L, lang } = useApp();
+  const router = useRouter();
+  const [q, setQ] = useState("");
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState(0);
+  const [files, setFiles] = useState(staticFileItems);
+  const loaded = useRef(false);
+  const box = useRef(null);
+
+  // تحميل فهرس الملفات الكامل عند أول تركيز على مربع البحث
+  const warm = () => {
+    if (loaded.current) return;
+    loaded.current = true;
+    buildFileIndex()
+      .then((idx) => {
+        const seen = new Set();
+        const merged = [...staticFileItems, ...idx].filter((f) => {
+          const k = f.url + "|" + f.material;
+          if (seen.has(k)) return false;
+          seen.add(k);
+          return true;
+        });
+        setFiles(merged);
+      })
+      .catch(() => {});
+  };
+
+  const results = useMemo(() => {
+    if (!q.trim()) return [];
+    const subs = fuzzySearch(subjectItems, q, (s) => [s.name, ...s.aliases], 5);
+    const fls = fuzzySearch(files, q, (f) => [f.name, f.subject], 6);
+    return [...subs, ...fls];
+  }, [q, files]);
+
+  useEffect(() => setActive(0), [q]);
+  useEffect(() => {
+    const onDoc = (e) => {
+      if (box.current && !box.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, []);
+
+  const choose = (item) => {
+    setOpen(false);
+    setQ("");
+    if (item.type === "subject") router.push(`/subject/${item.slug}/`);
+    else router.push(`/subject/${item.slug}/${item.material}/?q=${encodeURIComponent(item.name)}`);
+  };
+
+  const onKey = (e) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setOpen(true);
+      setActive((a) => Math.min(a + 1, results.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActive((a) => Math.max(a - 1, 0));
+    } else if (e.key === "Enter" && results[active]) {
+      e.preventDefault();
+      choose(results[active]);
+    } else if (e.key === "Escape") {
+      setOpen(false);
+    }
+  };
+
+  const materialLabel = (m) =>
+    m === "Exams" ? L("Exam", "امتحان") : L("Lecture / Sheet", "محاضرة / شيت");
+
+  return (
+    <div className="search" ref={box}>
+      <input
+        type="search"
+        role="combobox"
+        aria-expanded={open && results.length > 0}
+        aria-controls="gs-list"
+        autoComplete="off"
+        value={q}
+        placeholder={L("🔎 Search subjects, lectures, sheets...", "🔎 ابحث عن مادة أو محاضرة أو شيت...")}
+        onFocus={() => {
+          warm();
+          setOpen(true);
+        }}
+        onChange={(e) => {
+          setQ(e.target.value);
+          setOpen(true);
+        }}
+        onKeyDown={onKey}
+      />
+      {open && q.trim() && (
+        <ul className="gs-list" id="gs-list" role="listbox">
+          {results.length === 0 && (
+            <li className="gs-empty">{L("No matches. Try fewer letters.", "لا توجد نتائج. جرّب كلمة أقصر.")}</li>
+          )}
+          {results.map((item, i) => (
+            <li
+              key={item.type + (item.url || item.slug) + i}
+              role="option"
+              aria-selected={i === active}
+              className={"gs-item" + (i === active ? " active" : "")}
+              onMouseEnter={() => setActive(i)}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                choose(item);
+              }}
+            >
+              <span className="gs-ico">{item.icon}</span>
+              <span className="gs-text">
+                <b>{item.name}</b>
+                <small>
+                  {item.type === "subject"
+                    ? L("Subject", "مادة")
+                    : `${item.subject} · ${materialLabel(item.material)}`}
+                </small>
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+
+########################################################################
+FILE: src/components/LoginForm.js
+########################################################################
+
+"use client";
+
+import { useState } from "react";
+import { useApp } from "./AppProvider";
+import { useAuth } from "./AuthProvider";
+
+function friendly(err, L) {
+  const m = String(err?.message || "").toLowerCase();
+  if (m.includes("invalid login"))
+    return L("Email or password is incorrect.", "البريد الإلكتروني أو كلمة المرور غير صحيحة.");
+  if (m.includes("email not confirmed"))
+    return L("Confirm your email first, then sign in.", "أكّد بريدك الإلكتروني أولاً ثم سجّل الدخول.");
+  if (m.includes("already registered") || m.includes("already been registered"))
+    return L("This email already has an account. Sign in instead.", "هذا البريد لديه حساب بالفعل. سجّل الدخول بدلاً من ذلك.");
+  if (m.includes("password") && (m.includes("least") || m.includes("short") || m.includes("weak")))
+    return L("Password must be at least 6 characters.", "يجب ألا تقل كلمة المرور عن 6 أحرف.");
+  if (m.includes("rate limit") || m.includes("too many"))
+    return L("Too many attempts. Wait a minute and try again.", "محاولات كثيرة. انتظر دقيقة ثم حاول مجدداً.");
+  if (m.includes("failed to fetch") || m.includes("network"))
+    return L("No connection. Check your internet and try again.", "لا يوجد اتصال. تحقق من الإنترنت وحاول مجدداً.");
+  return L("Something went wrong. Try again.", "حدث خطأ. حاول مجدداً.");
+}
+
+const Icon = ({ children, className = "lg-ico" }) => (
+  <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4A5878"
+    strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    {children}
+  </svg>
+);
+const MailIcon = () => (
+  <Icon><rect x="3" y="5" width="18" height="14" rx="3" /><path d="M3 8l9 6 9-6" /></Icon>
+);
+const LockIcon = () => (
+  <Icon><rect x="4" y="10" width="16" height="11" rx="3" /><path d="M8 10V7a4 4 0 018 0v3" /></Icon>
+);
+const UserIcon = () => (
+  <Icon><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7" /></Icon>
+);
+
+/** نفس واجهة تسجيل الدخول للطلاب وللأدمن. mode = "student" | "admin" */
+export default function LoginForm({ mode = "student" }) {
+  const { L, lang } = useApp();
+  const { signIn, signUp, sendReset, setNewPassword, recovery } = useAuth();
+  const isAdmin = mode === "admin";
+
+  const [view, setView] = useState("signin"); // signin | signup | forgot
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [pw, setPw] = useState("");
+  const [show, setShow] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
+
+  const current = recovery ? "reset" : view;
+
+  const copy = {
+    signin: {
+      title: isAdmin ? L("Admin sign in", "دخول الأدمن") : L("Welcome back", "أهلاً بعودتك"),
+      sub: isAdmin
+        ? L("Only approved admins can manage files and students.", "إدارة الملفات والطلاب متاحة للأدمن فقط.")
+        : L("Sign in to continue to your account", "سجّل الدخول لمتابعة حسابك"),
+      button: L("Sign In", "تسجيل الدخول"),
+    },
+    signup: {
+      title: L("Create your account", "أنشئ حسابك"),
+      sub: L("Use your full name and email to get started", "أدخل اسمك الكامل وبريدك للبدء"),
+      button: L("Create account", "إنشاء الحساب"),
+    },
+    forgot: {
+      title: L("Reset your password", "استعادة كلمة المرور"),
+      sub: L("We'll email you a link to set a new one", "سنرسل لك رابطاً لتعيين كلمة مرور جديدة"),
+      button: L("Send reset link", "إرسال الرابط"),
+    },
+    reset: {
+      title: L("Choose a new password", "اختر كلمة مرور جديدة"),
+      sub: L("Use at least 6 characters", "استخدم 6 أحرف على الأقل"),
+      button: L("Save password", "حفظ كلمة المرور"),
+    },
+  }[current];
+
+  const go = (v) => {
+    setView(v);
+    setError("");
+    setInfo("");
+  };
+
+  async function onSubmit(e) {
+    e.preventDefault();
+    if (busy) return;
+    setError("");
+    setInfo("");
+
+    if (current !== "reset" && !email.trim()) {
+      setError(L("Enter your email address.", "أدخل بريدك الإلكتروني."));
+      return;
+    }
+    if (current === "signup" && name.trim().length < 3) {
+      setError(L("Enter your full name.", "أدخل اسمك الكامل."));
+      return;
+    }
+    if ((current === "signin" || current === "signup" || current === "reset") && pw.length < (current === "signin" ? 1 : 6)) {
+      setError(
+        current === "signin"
+          ? L("Enter your password.", "أدخل كلمة المرور.")
+          : L("Password must be at least 6 characters.", "يجب ألا تقل كلمة المرور عن 6 أحرف.")
+      );
+      return;
+    }
+
+    setBusy(true);
+    try {
+      if (current === "signin") {
+        const { error: err } = await signIn(email.trim(), pw);
+        if (err) setError(friendly(err, L));
+      } else if (current === "signup") {
+        const { data, error: err } = await signUp(name.trim(), email.trim(), pw);
+        if (err) setError(friendly(err, L));
+        else if (!data.session) {
+          setInfo(L("Account created. Check your email to confirm it, then sign in.", "تم إنشاء الحساب. افتح بريدك لتأكيده ثم سجّل الدخول."));
+          setView("signin");
+          setPw("");
+        }
+      } else if (current === "forgot") {
+        const { error: err } = await sendReset(email.trim());
+        if (err) setError(friendly(err, L));
+        else setInfo(L("Reset link sent. Check your inbox.", "تم إرسال الرابط. تحقق من بريدك."));
+      } else if (current === "reset") {
+        const { error: err } = await setNewPassword(pw);
+        if (err) setError(friendly(err, L));
+        else setInfo(L("Password updated.", "تم تحديث كلمة المرور."));
+      }
+    } catch (err) {
+      setError(friendly(err, L));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="lg-card">
+      <div className="lg-brand">
+        <div className="lg-logo">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#F6F4EE" strokeWidth="1.8"
+            strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M2 9l10-5 10 5-10 5-10-5z" />
+            <path d="M6 11.5V16c0 1.4 2.7 3 6 3s6-1.6 6-3v-4.5" />
+            <path d="M22 9v6" />
+          </svg>
+        </div>
+        <div className="lg-brand-text">
+          <div className="lg-brand-name" dir="ltr">Students IS</div>
+          <div className="lg-brand-sub">
+            {L("Al-Bayan University · Information Systems", "جامعة البيان · قسم نظم المعلومات")}
+          </div>
+        </div>
+      </div>
+
+      <div className="lg-head">
+        <h1>{copy.title}</h1>
+        <p>{copy.sub}</p>
+      </div>
+
+      <form className="lg-form" onSubmit={onSubmit} noValidate>
+        {current === "signup" && (
+          <div className="lg-field">
+            <label htmlFor="lg-name">{L("Full name", "الاسم الكامل")}</label>
+            <div className="lg-input">
+              <UserIcon />
+              <input id="lg-name" type="text" autoComplete="name" value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder={L("Your full name", "اسمك الكامل")} />
+            </div>
+          </div>
+        )}
+
+        {current !== "reset" && (
+          <div className="lg-field">
+            <label htmlFor="lg-email">{L("Email address", "البريد الإلكتروني")}</label>
+            <div className="lg-input">
+              <MailIcon />
+              <input id="lg-email" type="email" dir="ltr" autoComplete="email" value={email}
+                onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" />
+            </div>
+          </div>
+        )}
+
+        {current !== "forgot" && (
+          <div className="lg-field">
+            <div className="lg-row">
+              <label htmlFor="lg-pw">
+                {current === "reset" ? L("New password", "كلمة المرور الجديدة") : L("Password", "كلمة المرور")}
+              </label>
+              {current === "signin" && (
+                <button type="button" className="lg-link" onClick={() => go("forgot")}>
+                  {L("Forgot password?", "نسيت كلمة المرور؟")}
+                </button>
+              )}
+            </div>
+            <div className="lg-input">
+              <LockIcon />
+              <input id="lg-pw" type={show ? "text" : "password"} value={pw}
+                autoComplete={current === "signin" ? "current-password" : "new-password"}
+                onChange={(e) => setPw(e.target.value)}
+                placeholder={L("Enter your password", "أدخل كلمة المرور")} className="lg-pw" />
+              <button type="button" className="lg-eye"
+                aria-label={show ? L("Hide password", "إخفاء كلمة المرور") : L("Show password", "إظهار كلمة المرور")}
+                onClick={() => setShow(!show)}>
+                {show ? (
+                  <Icon className="">
+                    <path d="M3 3l18 18" />
+                    <path d="M10.6 6.1A10 10 0 0112 5c6.4 0 10 7 10 7a17 17 0 01-3.2 4M6.5 6.8C3.7 8.6 2 12 2 12s3.6 7 10 7a9.8 9.8 0 004.2-.9" />
+                    <path d="M9.9 9.9a3 3 0 004.2 4.2" />
+                  </Icon>
+                ) : (
+                  <Icon className="">
+                    <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </Icon>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {error && <div className="lg-msg err" role="alert">{error}</div>}
+        {info && <div className="lg-msg ok" role="status">{info}</div>}
+
+        <button type="submit" className="lg-submit" disabled={busy}>
+          {busy ? L("Please wait…", "يرجى الانتظار…") : copy.button}
+        </button>
+      </form>
+
+      {!isAdmin && current !== "reset" && (
+        <>
+          <div className="lg-or">
+            <span />
+            <em>{L("or", "أو")}</em>
+            <span />
+          </div>
+          <div className="lg-switch">
+            {current === "signin" ? (
+              <>
+                {L("Don't have an account?", "ليس لديك حساب؟")}{" "}
+                <button type="button" className="lg-link strong" onClick={() => go("signup")}>
+                  {L("Create one", "أنشئ حساباً")}
+                </button>
+              </>
+            ) : (
+              <>
+                {L("Already have an account?", "لديك حساب بالفعل؟")}{" "}
+                <button type="button" className="lg-link strong" onClick={() => go("signin")}>
+                  {L("Sign in", "سجّل الدخول")}
+                </button>
+              </>
+            )}
+          </div>
+        </>
+      )}
+      {isAdmin && current === "forgot" && (
+        <div className="lg-switch">
+          <button type="button" className="lg-link strong" onClick={() => go("signin")}>
+            {lang === "ar" ? "رجوع لتسجيل الدخول" : "Back to sign in"}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+########################################################################
+FILE: src/components/LoginShell.js
+########################################################################
+
+"use client";
+
+import { useApp } from "./AppProvider";
+
+/** الخلفية الزرقاء + زر تبديل اللغة، تحيط بنموذج تسجيل الدخول */
+export default function LoginShell({ children }) {
+  const { lang, toggleLang } = useApp();
+  return (
+    <main className="lg-page">
+      <button type="button" className="lg-lang" onClick={toggleLang}>
+        {lang === "ar" ? "English" : "عربي"}
+      </button>
+      <div className="lg-wrap">{children}</div>
+    </main>
+  );
+}
+
+
+########################################################################
+FILE: src/components/MaterialView.js
+########################################################################
+
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { useApp } from "./AppProvider";
+import { findSubject } from "@/lib/subjects";
+import { loadFiles, uploadSubmission } from "@/lib/files";
+import { QUESTIONS_DATA } from "@/data/questions";
+import { norm, fuzzySearch } from "@/lib/search";
+
+function Mcq({ subject }) {
+  const { L, lang } = useApp();
+  const list = QUESTIONS_DATA[subject.name] || [];
+  const [picked, setPicked] = useState({}); // {questionIndex: optionIndex}
+
+  if (!list.length) return <div className="empty">📂 {L("No questions available.", "لا توجد أسئلة متاحة حالياً.")}</div>;
+
+  return (
+    <div className="mcq-wrap">
+      <table className="mcq-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>{L("Question", "السؤال")}</th>
+            <th>{L("Options", "الخيارات")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {list.map((item, qi) => {
+            const opts = item.options[lang] || item.options.en || item.options.ar;
+            const chosen = picked[qi];
+            return (
+              <tr key={qi}>
+                <td className="mono" style={{ fontWeight: 700, width: 50 }}>{qi + 1}</td>
+                <td style={{ fontWeight: 700 }}>{item.q[lang] || item.q.en || item.q.ar}</td>
+                <td>
+                  {opts.map((opt, oi) => {
+                    let cls = "option-btn";
+                    if (chosen !== undefined) {
+                      if (oi === item.correct) cls += " correct";
+                      else if (oi === chosen) cls += " wrong";
+                    }
+                    return (
+                      <button key={oi} type="button" className={cls} disabled={chosen !== undefined}
+                        onClick={() => setPicked((p) => ({ ...p, [qi]: oi }))}>
+                        {opt}
+                      </button>
+                    );
+                  })}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function Files({ subject, material }) {
+  const { L } = useApp();
+  const [files, setFiles] = useState(null); // null = loading, "error"
+  const [q, setQ] = useState("");
+  const [msg, setMsg] = useState(null); // {text, err}
+  const [busy, setBusy] = useState(false);
+  const fileInput = useRef(null);
+
+  useEffect(() => {
+    let alive = true;
+    setFiles(null);
+    loadFiles(subject.name, material)
+      .then((d) => alive && setFiles(d))
+      .catch((e) => {
+        console.error(e);
+        if (alive) setFiles("error");
+      });
+    return () => {
+      alive = false;
+    };
+  }, [subject.name, material]);
+
+  // فتح الصفحة من نتيجة البحث التلقائي: ?q=اسم الملف
+  useEffect(() => {
+    try {
+      const v = new URLSearchParams(window.location.search).get("q");
+      if (v) setQ(v);
+    } catch {}
+  }, []);
+
+  const flash = (text, err) => {
+    setMsg({ text, err });
+    setTimeout(() => setMsg(null), 6000);
+  };
+
+  const onUpload = async () => {
+    const file = fileInput.current?.files?.[0];
+    if (!file || busy) return;
+    setBusy(true);
+    flash(L("Uploading...", "جارٍ الرفع..."), false);
+    try {
+      await uploadSubmission(subject.name, material, file);
+      flash(L("Uploaded. It will appear after admin approval ✅", "تم الرفع، سيظهر بعد موافقة الأدمن ✅"), false);
+      fileInput.current.value = "";
+    } catch (e) {
+      console.error(e);
+      flash(L("Could not upload the file.", "تعذر رفع الملف."), true);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  let shown = Array.isArray(files) ? files : [];
+  if (q.trim()) {
+    const direct = shown.filter((f) => norm(f.name).includes(norm(q)));
+    shown = direct.length ? direct : fuzzySearch(shown, q, (f) => [f.name], 50);
+  }
+
+  return (
+    <>
+      <div className="upload-card">
+        <h3>{L("📤 Upload a File (reviewed before publishing)", "📤 رفع ملف (يُنشر بعد المراجعة)")}</h3>
+        <input type="file" ref={fileInput} accept="application/pdf,.doc,.docx,.ppt,.pptx,image/*" />
+        <button type="button" onClick={onUpload} disabled={busy}>{L("Upload", "رفع")}</button>
+        {msg && <div className={"msg show" + (msg.err ? " err" : "")}>{msg.text}</div>}
+      </div>
+
+      <input type="text" className="file-search" value={q} onChange={(e) => setQ(e.target.value)}
+        placeholder={L("🔎 Search files in this section...", "🔎 ابحث في هذا القسم...")} />
+
+      <div className="file-list">
+        {files === null && <div className="empty">{L("Loading...", "جارٍ التحميل...")}</div>}
+        {files === "error" && <div className="empty">{L("Could not load files.", "تعذر تحميل الملفات.")}</div>}
+        {Array.isArray(files) && files.length === 0 && (
+          <div className="empty">📂 {L("No files available yet.", "لا توجد ملفات بعد.")}</div>
+        )}
+        {Array.isArray(files) && files.length > 0 && shown.length === 0 && (
+          <div className="empty">{L("No files match your search.", "لا توجد ملفات مطابقة للبحث.")}</div>
+        )}
+        {shown.map((f) => (
+          <div className="file" key={f.url}>
+            <span>📄 {f.name}</span>
+            <button type="button" onClick={() => window.open(f.url, "_blank", "noopener")}>
+              {L("Open", "فتح")}
+            </button>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+export default function MaterialView({ slug, material }) {
+  const { L } = useApp();
+  const subject = findSubject(slug);
+
+  if (!subject) {
+    return (
+      <div className="container">
+        <p className="empty">{L("Subject not found.", "المادة غير موجودة.")}</p>
+        <Link href="/" className="back">{L("← Back", "→ رجوع")}</Link>
+      </div>
+    );
+  }
+
+  const title =
+    material === "Questions" ? L("Review Questions (MCQ)", "أسئلة الاختيار المتعدد") : material;
+
+  return (
+    <div className="container">
+      <Link href={`/subject/${subject.slug}/`} className="back">{L("← Back", "→ رجوع")}</Link>
+      <div className="subject-title">
+        <h2>{subject.name} - {title}</h2>
+      </div>
+      {material === "Questions" ? <Mcq subject={subject} /> : <Files subject={subject} material={material} />}
+    </div>
+  );
+}
+
+
+########################################################################
+FILE: src/components/Shell.js
+########################################################################
+
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useApp } from "./AppProvider";
+import { useAuth } from "./AuthProvider";
+import GlobalSearch from "./GlobalSearch";
+
+/** الهيكل العام للمنصة: الهيدر، التنقل، البحث، الفوتر + حماية الصفحات بتسجيل الدخول */
+export default function Shell({ children }) {
+  const { L, dark, toggleDark, toggleLang, lang } = useApp();
+  const { session, loading, recovery, signOut, displayName } = useAuth();
+  const router = useRouter();
+  const path = usePathname() || "/";
+
+  const [showAdmin, setShowAdmin] = useState(false);
+  const taps = useRef({ n: 0, t: null });
+
+  useEffect(() => {
+    if (!loading && (!session || recovery)) router.replace("/login/");
+  }, [loading, session, recovery, router]);
+
+  if (loading || !session || recovery) {
+    return <div className="splash" aria-busy="true">🎓</div>;
+  }
+
+  const onLogoTap = () => {
+    const s = taps.current;
+    s.n += 1;
+    clearTimeout(s.t);
+    s.t = setTimeout(() => (s.n = 0), 3000);
+    if (s.n >= 5) {
+      s.n = 0;
+      setShowAdmin(true);
+    }
+  };
+
+  const is = (p) => (p === "/" ? path === "/" : path.startsWith(p));
+
+  return (
+    <>
+      <header>
+        <h1>{L("🎓 Students IS Education Platform", "🎓 منصة Students IS التعليمية")}</h1>
+        <p>{L("Al-Bayan University", "جامعة البيان")}</p>
+        <p>{L("College of Computer Science & IT", "كلية علوم الحاسوب وتقانة المعلومات")}</p>
+        <p>{L("Information Systems Department", "قسم نظم المعلومات")}</p>
+      </header>
+
+      <nav>
+        <Link href="/" className={is("/") ? "active" : ""}>{L("🏠 Home", "🏠 الرئيسية")}</Link>
+        <Link href="/tasks/" className={is("/tasks") ? "active" : ""}>{L("📝 Tasks", "📝 مهامي")}</Link>
+        <Link href="/about/" className={is("/about") ? "active" : ""}>{L("ℹ️ About", "ℹ️ حول المنصة")}</Link>
+        <button type="button" onClick={toggleDark} aria-label={L("Toggle dark mode", "تبديل الوضع الليلي")}>
+          {dark ? "☀️" : "🌙"}
+        </button>
+        <button type="button" onClick={toggleLang}>{lang === "ar" ? "English" : "عربي"}</button>
+        <button type="button" onClick={signOut} title={displayName}>
+          {L("Sign out", "تسجيل خروج")}
+        </button>
+      </nav>
+
+      <GlobalSearch />
+
+      <main>{children}</main>
+
+      <footer>
+        <p id="footerLogo" onClick={onLogoTap} style={{ cursor: "default", userSelect: "none" }}>
+          🎓 Students IS Education Platform
+        </p>
+        <p className="contact">
+          👤 Murtda eissa | 📞 0998359296 | ✉️ Murtdaeissa90@gmail.com
+        </p>
+        <div className="credits">
+          <span className="label">{L("Developed by", "تطوير وإعداد")}</span>
+          <span className="names">
+            {L("Murtda Eissa", "مرتضى عيسى")} <i>•</i> {L("Abdullah Ismail", "عبدالله إسماعيل")}
+          </span>
+        </div>
+        <p>© 2026 All Rights Reserved</p>
+        {showAdmin && (
+          <Link href="/admin/" className="admin-link">🔑 Admin</Link>
+        )}
+      </footer>
+    </>
+  );
+}
+
+
+########################################################################
+FILE: src/components/SubjectView.js
+########################################################################
+
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useApp } from "./AppProvider";
+import { findSubject } from "@/lib/subjects";
+import { MATERIALS } from "@/data/semesters";
+
+const EXAM_KEY = "exam_dates";
+
+function loadDates() {
+  try {
+    return JSON.parse(localStorage.getItem(EXAM_KEY)) || {};
+  } catch {
+    return {};
+  }
+}
+
+export default function SubjectView({ slug }) {
+  const { L, lang } = useApp();
+  const subject = findSubject(slug);
+  const [dateStr, setDateStr] = useState("");
+  const [saved, setSaved] = useState("");
+
+  useEffect(() => {
+    if (!subject) return;
+    const v = loadDates()[subject.name] || "";
+    setSaved(v);
+    setDateStr(v);
+  }, [subject]);
+
+  if (!subject) {
+    return (
+      <div className="container">
+        <p className="empty">{L("Subject not found.", "المادة غير موجودة.")}</p>
+        <Link href="/" className="back">{L("← Back", "→ رجوع")}</Link>
+      </div>
+    );
+  }
+
+  const persist = (value) => {
+    const dates = loadDates();
+    if (value) dates[subject.name] = value;
+    else delete dates[subject.name];
+    try {
+      localStorage.setItem(EXAM_KEY, JSON.stringify(dates));
+    } catch (e) {
+      console.error("Could not save exam date:", e);
+    }
+    setSaved(value);
+  };
+
+  // العد التنازلي للامتحان
+  let examNode = L("⏳ No exam date set", "⏳ لم يُحدد موعد امتحان");
+  let urgent = false;
+  if (saved) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const days = Math.round((new Date(saved + "T00:00:00") - today) / 86400000);
+    urgent = days >= 0 && days <= 2;
+    if (days < 0) examNode = L("✅ This exam date has passed", "✅ انتهى موعد هذا الامتحان");
+    else if (days === 0) examNode = L("🚨 Exam is today!", "🚨 الامتحان اليوم!");
+    else
+      examNode =
+        lang === "ar" ? (
+          <>⏳ باقي <span className="mono">{days}</span> يوم على الامتحان</>
+        ) : (
+          <>⏳ <span className="mono">{days}</span> day(s) left until the exam</>
+        );
+  }
+
+  return (
+    <div className="container">
+      <Link href="/" className="back">{L("← Back", "→ رجوع")}</Link>
+      <div className="subject-title">
+        <h2>📚 {subject.name}</h2>
+      </div>
+
+      <div className={"exam-card" + (urgent ? " urgent" : "")}>
+        <span>{examNode}</span>
+        <input type="date" value={dateStr} onChange={(e) => setDateStr(e.target.value)} />
+        <button type="button" onClick={() => dateStr && persist(dateStr)}>{L("Save", "حفظ")}</button>
+        <button type="button" className="clear-btn" onClick={() => { setDateStr(""); persist(""); }}>
+          {L("Clear", "مسح")}
+        </button>
+      </div>
+
+      <div className="materials">
+        {MATERIALS.map(([key, icon, en, ar]) => (
+          <Link key={key} href={`/subject/${subject.slug}/${key}/`} className="material">
+            <div className="material-icon">{icon}</div>
+            <h3>{lang === "ar" ? ar : key}</h3>
+            <p>{lang === "ar" ? ar : en}</p>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
+########################################################################
+FILE: src/data/aliases.js
+########################################################################
+
+// أسماء عربية بديلة للمواد، تُستخدم فقط في البحث التلقائي
+// (الطالب يكتب بالعربي فيجد المادة حتى لو اسمها المعروض بالإنجليزي).
+export const SUBJECT_ALIASES = {
+  "Business Communication": ["الاتصالات في الأعمال", "التواصل في الاعمال", "اتصالات الاعمال"],
+  "Programming Methods II": ["طرق البرمجة 2", "مناهج البرمجة 2", "برمجة 2"],
+  "Accounting II": ["المحاسبة 2", "محاسبة 2"],
+  "Internet Programming": ["برمجة الانترنت", "برمجة الويب"],
+  "Principles of Finance": ["مبادئ التمويل", "مبادئ المالية", "التمويل"],
+  "Probability & Statistics": ["الاحتمالات والاحصاء", "احصاء", "الاحصاء"],
+  "English Language III": ["اللغة الانجليزية 3", "انجليزي 3"],
+  "Accounting I": ["المحاسبة 1", "محاسبة 1"],
+  "Arabic Language II": ["اللغة العربية 2", "عربي 2"],
+  "Calculus": ["التفاضل والتكامل", "كالكلس", "تفاضل"],
+  "Computer Applications for Business": ["تطبيقات الحاسوب في الاعمال", "تطبيقات الحاسوب", "اكسل"],
+  "English Language II": ["اللغة الانجليزية 2", "انجليزي 2"],
+  "Fundamentals of Information Systems": ["اساسيات نظم المعلومات", "مبادئ نظم المعلومات"],
+  "Islamic Studies II": ["الدراسات الاسلامية 2", "ثقافة اسلامية 2", "دراسات اسلامية"],
+  "Managing People": ["ادارة الافراد", "ادارة الموارد البشرية", "ادارة الناس"],
+  "Programming Methods I": ["طرق البرمجة 1", "مناهج البرمجة 1", "برمجة 1"],
+  "Sudanese Studies": ["الدراسات السودانية", "دراسات سودانية"]
+};
+
+
+########################################################################
+FILE: src/data/files.js
+########################################################################
+
+// روابط الملفات الرسمية (محاضرات / شيتات / امتحانات).
+// لإضافة رابط جديد:  "اسم المادة": { "Lectures": [ {name:"...", url:"..."} ], "Exams": [ ... ] }
+export const STATIC = {
+ "Arabic Language II": {
+  "Lectures": [
+   {name:"Arabic 1", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Arabic%20Language%20II/Arabic%201"},
+   {name:"Arabic 2", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Arabic%20Language%20II/bdf2.pdf"},
+   {name:"Arabic 3", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Arabic%20Language%20II/bdf3%20(1).pdf"},
+   {name:"Arabic 4", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Arabic%20Language%20II/bdf4.pdf"},
+   {name:"Arabic 5", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Arabic%20Language%20II/bdf5.pdf"},
+   {name:"Arabic 6", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Arabic%20Language%20II/bdf6.pdf"},
+   {name:"Arabic 7", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Arabic%20Language%20II/bdf7.pdf"},
+   {name:"Arabic 8", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Arabic%20Language%20II/bdf8.pdf"},
+   {name:"Arabic 9", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Arabic%20Language%20II/bdf9.pdf"},
+   {name:"Arabic 10", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Arabic%20Language%20II/bdf10.pdf"}
+  ]
+ },
+ "Calculus": {
+  "Lectures": [
+   {name:"Calculus II", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Calculus%20II/Calculus%20II.pdf"}
+  ]
+ },
+ "Computer Applications for Business": {
+  "Lectures": [
+   {name:"MCQZ", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Computer%20business/MCQZ.pdf"},
+   {name:"Excel", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Computer%20business/Excel.pdf"},
+   {name:"Excel Complete", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Computer%20business/Excel%20Complete.pdf"}
+  ]
+ },
+ "Sudanese Studies": {
+  "Lectures": [
+   {name:"Sudanese Studies", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Sudanese%20Studies/Sudanese%20Studies.pdf"}
+  ]
+ },
+ "Islamic Studies II": {
+  "Lectures": [
+   {name:"Islamic 2", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Islamic%20II/Islamic2.pdf"}
+  ]
+ },
+ "English Language II": {
+  "Lectures": [
+   {name:"Lesson 1", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/English%20II/lesson%201_2a0607a8d04feca7b86f87917f5b62c1.pptx"},
+   {name:"Lesson 2", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/English%20II/lesson%202_88d6531af0b9f16901ad974e3b7e8b07.pptx"},
+   {name:"Lesson 3", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/English%20II/lesson%203_613f744cd8006cb742a0b1c263a4ef92.pptx"},
+   {name:"Lesson 4", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/English%20II/lesson%204_847767a47f9730469a59cbaa8831299a.pptx"},
+   {name:"Lesson 5", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/English%20II/lesson%205_3b1c36f743892cfcae1631f28080702e.pptx"},
+   {name:"Lesson 6", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/English%20II/lesson%206_30d572b94b142df78a8d57e2bbba7c67.pptx"},
+   {name:"Lesson 7", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/English%20II/lesson%207_5b942a6751c232556e482e0437311872.pptx"},
+   {name:"Lesson 8", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/English%20II/lesson%208_1748a39339391c32f8a3066eb4172000.pptx"},
+   {name:"Lesson 9", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/English%20II/lesson%209_0475c4d589e910c1e0a72304ed7789e4.pptx"},
+   {name:"Lesson 10", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/English%20II/lesson%2010_7784aa01feb7ff2a1179b616f59d26dc.pptx"}
+  ]
+ },
+ "Managing People": {
+  "Lectures": [
+   {name:"Managing 1", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Managing%20people/Managing1.pdf"},
+   {name:"Managing 2", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Managing%20people/Managing2.pdf"},
+   {name:"3 - Understanding Individual Behavior 1", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Managing%20people/3-%20Understanding%20Individual%20Behavior1_b92522c625a5a9aab039cbec25b229be.pptx"},
+   {name:"4 - Understanding Individual Behavior 2", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Managing%20people/4-%20Understanding%20Individual%20Behavior2_17896c1b20e10c32e4c14f8b68beeaf6.pptx"},
+   {name:"5 - Understanding Individual Behavior 3", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Managing%20people/5-%20Understanding%20Individual%20Behavior3_9186f3525eab740f3318189556ed1819.pptx"},
+   {name:"6 - Groups and Teams", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Managing%20people/6-%20Groups%20and%20Teams_be62de1373b7e81f6875e99ea0be0000.pptx"},
+   {name:"7 - Work Design and Job Analysis", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Managing%20people/7-%20Work%20Design%20and%20Job%20Analysis_609f0ed4777290648380d7c5139c7103.pptx"},
+   {name:"8 - Recruitment", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Managing%20people/8-%20Recruitment_ab4ee91378d5a2de3f334ab94f55603a.pptx"},
+   {name:"9 - Selection", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Managing%20people/9-%20Selection_b2641fabe5d44b148fd194265c597891.pptx"},
+   {name:"10 - Performance Appraisal", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Managing%20people/10-%20Performance%20Appraisal_c073c1828b2d89ada87abdee01d0ebb1.pptx"}
+  ]
+ },
+ "Programming Methods I": {
+  "Lectures": [
+   {name:"Lecture 1", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Programing%20method%201/LEC%201"},
+   {name:"Lecture 2", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Programing%20method%201/LEC%202"},
+   {name:"Lecture 3 - C++ Data Types", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Programing%20method%201/LEC%203%20C++%20data%20types.pdf"},
+   {name:"Lecture 4 - C++ Input & Operators", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Programing%20method%201/LEC%204%20C++%20input&operators.pdf"},
+   {name:"Lecture 5 - String and Math C++", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Programing%20method%201/LEC%205%20String%20and%20Math%20C++.pdf"},
+   {name:"Lecture 6 - Control Statement C++", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Programing%20method%201/LEC%206%20Control%20Statement%20C++.pdf"},
+   {name:"Lecture 7 - Loops C++", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Programing%20method%201/LEC%207%20Loops%20%20C++.pdf"},
+   {name:"Lecture 8", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Programing%20method%201/LEC%208"},
+   {name:"Lecture 9", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Programing%20method%201/LEC%209"}
+  ]
+ },
+ "Accounting I": {
+  "Lectures": [
+   {name:"Accounting Sheet 1", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Accounting/Accounting%20(1).pdf"}
+  ]
+ },
+ "Fundamentals of Information Systems": {
+  "Lectures": [
+   {name:"ICT Work Sheet 1", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Fundamental%20of%20information%20systems/ICT%20WORK%20SHEET%201"},
+   {name:"ICT Work Sheet 2", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Fundamental%20of%20information%20systems/ICT%20WORK%20SHEET%202"},
+   {name:"ICT Work Sheet 3", url:"https://jetxkhyvcxuxvheastlr.supabase.co/storage/v1/object/public/Twix/Fundamental%20of%20information%20systems/ICT%20Worksheet%203."}
+  ]
+ }
+};
+
+
+########################################################################
+FILE: src/data/questions.js
+########################################################################
+
+// أسئلة الاختيار من متعدد (ثنائية اللغة). correct = رقم الإجابة الصحيحة (يبدأ من 0).
+export const QUESTIONS_DATA = {
+ "Business Communication": [
+  { q:{ar:"ما هو الهدف الأساسي من الاتصالات في الأعمال (Business Communication)؟",en:"What is the primary goal of business communication?"}, options:{ar:["نقل المعلومات بوضوح وتحقيق الأهداف التنظيمية","إصدار أوامر شفهية فقط","تأخير اتخاذ القرارات","إلغاء الاجتماعات"],en:["Transmit info clearly and achieve organizational goals","Issue oral orders only","Delay decisions","Cancel meetings"]}, correct:0 },
+  { q:{ar:"الاتصال غير اللفظي يشمل:",en:"Non-verbal communication includes:"}, options:{ar:["لغة الجسد وتعبيرات الوجه والنبرة","الرسائل البريدية الطويلة","التقارير المالية المكتوبة","الكتب والمراجع"],en:["Body language, facial expressions, and tone","Long emails","Written financial reports","Books and references"]}, correct:0 },
+  { q:{ar:"من عناصر عملية الاتصال الناجح:",en:"Elements of successful communication include:"}, options:{ar:["المُرسِل، الرسالة، القناة، المُستقبِل، والتغذية الراجعة","المكتب، الطابعة، الإنترنت، الكرسي","الأرباح، الخسائر، الضرائب، التكاليف","المدير، الموظف، الأرشيف، الأجر"],en:["Sender, message, channel, receiver, and feedback","Desk, printer, internet, chair","Profit, loss, taxes, costs","Manager, employee, archive, salary"]}, correct:0 },
+  { q:{ar:"العوائق التي تواجه الاتصال الفعال قد تكون:",en:"Barriers to effective communication can be:"}, options:{ar:["عوائق مادية، نفسية، وثقافية","عوائق رقمية فقط","لا توجد عوائق أبداً","استخدام اللغة بوضوح"],en:["Physical, psychological, and cultural barriers","Digital barriers only","No barriers at all","Clear language use"]}, correct:0 },
+  { q:{ar:"التقارير الإدارية المكتوبة يجب أن تتميز بـ:",en:"Written business reports should be characterized by:"}, options:{ar:["الدقة، الإيجاز، والوضوح","الغموض والطول المبالغ فيه","القصص الخيالية","اللغة غير المفهومة"],en:["Accuracy, conciseness, and clarity","Ambiguity and excessive length","Fictional stories","Incomprehensible language"]}, correct:0 },
+  { q:{ar:"الاستماع الفعال (Active Listening) يتطلب:",en:"Active listening requires:"}, options:{ar:["التركيز الكامل وفهم رسالة المتحدث وعدم المقاطعة","التفكير في الرد أثناء كلام المتحدث","تجاهل المتحدث تماماً","الانشغال بالهاتف المحمول"],en:["Full focus, understanding speaker's message without interrupting","Thinking of reply while speaking","Ignoring the speaker","Using mobile phone"]}, correct:0 },
+  { q:{ar:"البريد الإلكتروني الرسمي في العمل يُستخدم لـ:",en:"Official business email is used for:"}, options:{ar:["التواصل المهني الموثق والسريع بين الزملاء والإدارة","الألعاب الترفيهية","الدردشة الشخصية البحتة","نشر الفيديوهات العائلية"],en:["Documented and fast professional communication","Games","Pure personal chat","Posting family videos"]}, correct:0 },
+  { q:{ar:"لغة العرض التقديمي (Presentation) الجيد تعتمد على:",en:"A good presentation relies on:"}, options:{ar:["شرائح واضحة، نبرة صوت مناسبة، والتفاعل مع الجمهور","قراءة النصوص حرفياً بلا إيقاف","إظهار نصوص صغيرة غير مقروءة","إطفاء الأنوار نهائياً"],en:["Clear slides, good voice tone, and audience engagement","Reading texts literally without stopping","Showing small unreadable text","Turning off lights"]}, correct:0 },
+  { q:{ar:"التفاوض الناجح في بيئة الأعمال يهدف إلى:",en:"Successful business negotiation aims to:"}, options:{ar:["الوصول إلى حلول وسط ومكاسب مشتركة للطرفين","خسارة الطرف الآخر تماماً","إنهاء العلاقة التجارية","فرض الرأي بالقوة"],en:["Reaching compromises and mutual benefits","Total loss of the other party","Ending business relationship","Imposing opinion by force"]}, correct:0 },
+  { q:{ar:"الأخلاقيات المهنية في الاتصالات تتطلب:",en:"Professional ethics in communication require:"}, options:{ar:["الصدق، الأمانة، واحترام سرية المعلومات","تلفيق الأخبار والمعلومات","خداع العملاء","انتشار الشائعات"],en:["Honesty, integrity, and respecting information confidentiality","Fabricating news","Deceiving clients","Spreading rumors"]}, correct:0 }
+ ],
+ "Programming Methods II": [
+  { q:{ar:"في لغة C++، المؤشرات (Pointers) تُستخدم لتخزين:",en:"In C++, pointers are used to store:"}, options:{ar:["عناوين الذاكرة للمتغيرات الأخرى","القيم الحرفية فقط","أسماء الملفات الخارجية","حجم الشاشة"],en:["Memory addresses of other variables","Literal values only","External filenames","Screen size"]}, correct:0 },
+  { q:{ar:"البرمجة كائنية التوجه (OOP) تعتمد أساساً على:",en:"Object-Oriented Programming (OOP) is mainly based on:"}, options:{ar:["الكائنات (Objects) والأصناف (Classes)","الدوال الرياضية البسيطة فقط","الجداول المتسلسلة","النصوص الثابتة"],en:["Objects and Classes","Simple mathematical functions only","Sequential tables","Static texts"]}, correct:0 },
+  { q:{ar:"مفهوم الوراثة (Inheritance) في OOP يتيح:",en:"The concept of Inheritance in OOP allows:"}, options:{ar:["إنشاء فئة جديدة ترث خصائص ووظائف فئة موجودة","حذف جميع الفئات السابقة","إبطال عمل الدوال","منع إعادة استخدام الكود"],en:["Creating a new class inheriting properties/methods of an existing class","Deleting previous classes","Invalidating functions","Preventing code reuse"]}, correct:0 },
+  { q:{ar:"التغليف (Encapsulation) يعني:",en:"Encapsulation means:"}, options:{ar:["دمج البيانات والدوال التي تعمل عليها في وحدة واحدة وحمايتها","فتح جميع البيانات للعامة","إلغاء المتغيرات الخاصة","تخزين الملفات في القرص الصلب"],en:["Bundling data and methods operating on it into a single unit and protecting it","Opening all data to public","Canceling private variables","Storing files on hard disk"]}, correct:0 },
+  { q:{ar:"تعدد الأشكال (Polymorphism) يسمح بـ:",en:"Polymorphism allows:"}, options:{ar:["استخدام نفس اسم الدالة بأشكال وسلوكيات مختلفة حسب الكائن","منع تكرار الدوال نهائياً","تنفيذ كود واحد فقط","إيقاف البرنامج عند الأخطاء"],en:["Using the same function name with different behaviors based on the object","Preventing function duplication","Executing only one code","Stopping program on errors"]}, correct:0 },
+  { q:{ar:"المُنشئ (Constructor) في الكلاس هو دالة:",en:"A Constructor in a class is a function that:"}, options:{ar:["يتم استدعاؤها تلقائياً عند إنشاء كائن لتهيئة البيانات","تُستخدم لحذف الكائن نهائياً","لا تعمل أبداً","تطبع النصوص على الشاشة"],en:["Is automatically called when creating an object to initialize data","Is used to delete the object","Never runs","Prints text on screen"]}, correct:0 },
+  { q:{ar:"المُهدم (Destructor) يتميز بوجود الرمز:",en:"A Destructor is distinguished by having the symbol:"}, options:{ar:["الرمز ~ قبل اسم الكلاس","الرمز &","الرمز *","الرمز #"],en:["The symbol ~ before class name","The symbol &","The symbol *","The symbol #"]}, correct:0 },
+  { q:{ar:"الدوال الصديقة (Friend Functions) تملك صلاحية:",en:"Friend functions have the permission to:"}, options:{ar:["الوصول إلى الأعضاء الخاصة (Private) والمحمية للكلاس","تعديل النظام التشغيلي للحاسوب","حذف ملفات المترجم","منع تشغيل البرنامج"],en:["Access private and protected members of a class","Modify OS","Delete compiler files","Prevent execution"]}, correct:0 },
+  { q:{ar:"إدارة الذاكرة الديناميكية (Dynamic Memory) في C++ تتم عبر:",en:"Dynamic memory management in C++ uses:"}, options:{ar:["أوامر new و delete","أوامر cin و cout","أوامر if و else","أوامر for و while"],en:["new and delete operators","cin and cout","if and else","for and while"]}, correct:0 },
+  { q:{ar:"القوالب (Templates) في C++ تُستخدم لـ:",en:"Templates in C++ are used to:"}, options:{ar:["كتابة دالة أو كلاس عام يعمل مع أنواع بيانات مختلفة","تصميم واجهات المستخدم الرسومية","ربط قواعد البيانات السحابية","حفظ الكود بصيغة PDF"],en:["Write generic functions or classes working with various data types","Design GUI","Connect cloud databases","Save code as PDF"]}, correct:0 }
+ ],
+ "Accounting II": [
+  { q:{ar:"المحاسبة عن الشركات (Partnership Accounting) تتعلق بـ:",en:"Partnership accounting relates to:"}, options:{ar:["شركات يمتلكها شخصان أو أكثر تقاسموا رأس المال والأرباح","الشركات المساهمة الكبرى فقط","المؤسسات الحكومية الخدمية","الحسابات الشخصية للأفراد"],en:["Companies owned by two or more sharing capital and profits","Large corporations only","Government service institutions","Personal accounts"]}, correct:0 },
+  { q:{ar:"توزيع الأرباح والخسائر بين الشركاء يتم بناءً على:",en:"Profit and loss distribution among partners is based on:"}, options:{ar:["عقد الشراكة واتفاق الشركاء","رغبة العميل الخارجي","التقدير العشوائي","الضرائب الحكومية"],en:["Partnership agreement and partners' contract","External client desire","Random estimation","Government taxes"]}, correct:0 },
+  { q:{ar:"محاسبة التكاليف (Cost Accounting) تهتم أساساً بـ:",en:"Cost Accounting mainly focuses on:"}, options:{ar:["تحديد وقياس تكلفة إنتاج السلع والخدمات للرقابة واتخاذ القرار","إعداد الميزانية العامة للدولة","حساب رواتب الموظفين الإداريين فقط","تسجيل المبيعات اليومية"],en:["Determining and measuring cost of goods/services for control and decisions","Preparing state budget","Calculating administrative salaries only","Recording daily sales"]}, correct:0 },
+  { q:{ar:"التكاليف المباشرة هي التي:",en:"Direct costs are those that:"}, options:{ar:["يمكن تتبعها بسهولة ووضوح إلى وحدة المنتج المصنوع","لا يمكن ربطها بالمنتج","تعتبر إيرادات عامة","تُصرف على الإدارة العليا فقط"],en:["Can be easily and clearly traced to the product unit","Cannot be linked to product","Are general revenues","Spent on top management only"]}, correct:0 },
+  { q:{ar:"التكاليف الصناعية غير المباشرة تشمل:",en:"Indirect manufacturing costs include:"}, options:{ar:["إيجار المصنع، إضاءة المصنع، واستهلاك الآلات","أجور العمال المباشرين على خط الإنتاج","تكلفة المواد الخام الأساسية المباشرة","أرباح الأسهم"],en:["Factory rent, factory lighting, and machinery depreciation","Direct workers' wages on production line","Direct raw material cost","Dividends"]}, correct:0 },
+  { q:{ar:"نظام التكاليف بالأوامر الإنتاجية (Job Order Costing) يُستخدم عندما:",en:"Job Order Costing is used when:"}, options:{ar:["تكون المنتجات فريدة ومصممة حسب طلب العميل الخاص","الإنتاج ضخم ونمطي ومتماثل تماماً","لا يوجد إنتاج سلع","الشركة تقدم خدمات استشارية قانونية فقط"],en:["Products are unique and custom-made per client request","Production is massive, standard, and identical","No goods production","Company offers legal consulting only"]}, correct:0 },
+  { q:{ar:"نظام تكاليف المراحل الإنتاجية (Process Costing) يناسب الشركات التي:",en:"Process Costing suits companies that:"}, options:{ar:["تنتج منتجات نمطية متماثلة بكميات ضخمة ومستمرة","تصنع منتجات فريدة مخصصة للطلبات الخاصة","تبيع عقارات سكنية","تعمل في المحاماة"],en:["Produce identical standard products in massive continuous quantities","Manufacture unique custom products","Sell residential real estate","Work in law"]}, correct:0 },
+  { q:{ar:"انضمام شريك جديد للشركة قد يتضمن:",en:"Admission of a new partner may involve:"}, options:{ar:["شراء حصة من الشركاء القدامى أو استثمار أصل جديد بالشركة","تصفية الشركة إجبارياً","إلغاء رأس المال تماماً","تخفيض الأصول للصفر"],en:["Buying interest from old partners or investing new assets","Compulsory liquidation","Canceling capital","Reducing assets to zero"]}, correct:0 },
+  { q:{ar:"عند انسحاب أو تقاعد شريك، يتم:",en:"Upon withdrawal or retirement of a partner:"}, options:{ar:["إعادة تقييم الأصول وتحديد نصيبه وصافي حقوقه بدقة","طرد باقي الشركاء","حرق الدفاتر المحاسبية","تحويل الشركة لجمعية خيرية"],en:["Revaluing assets and accurately determining his share and net equity","Expelling remaining partners","Burning books","Turning company into charity"]}, correct:0 },
+  { q:{ar:"الموازنة التخطيطية (Budget) تعتبر أداة لـ:",en:"A Budget is considered a tool for:"}, options:{ar:["التخطيط المالي والرقابة وتقييم الأداء المستقبلي","تسجيل العمليات الماضية فقط","إثبات الضرائب المحصلة","منع الاستثمار"],en:["Financial planning, control, and future performance evaluation","Recording past operations only","Proving collected taxes","Preventing investment"]}, correct:0 }
+ ],
+ "Internet Programming": [
+  { q:{ar:"لغة HTML تُستخدم أساساً لـ:",en:"HTML is mainly used for:"}, options:{ar:["هيكل وبنية صفحة الويب وعرض المحتوى","تنسيق الألوان والتصميم الجمالي","التحكم بالعمليات المنطقية وبرمجة السيرفر","إدارة قواعد البيانات السحابية"],en:["Structuring webpage and displaying content","Styling colors and aesthetic design","Controlling logic and server programming","Managing cloud databases"]}, correct:0 },
+  { q:{ar:"لغة CSS تُستعمل في:",en:"CSS is used for:"}, options:{ar:["تنسيق وتصميم صفحات الويب (الألوان، الخطوط، التخطيط)","كتابة خوارزميات قواعد البيانات","تخزين الملفات الضخمة","الربط مع السيرفر"],en:["Styling and designing webpages (colors, fonts, layout)","Writing database algorithms","Storing huge files","Server connection"]}, correct:0 },
+  { q:{ar:"لغة JavaScript تعتبر لغة:",en:"JavaScript is considered a:"}, options:{ar:["لغة برمجة تفاعلية تعمل في متصفح المستخدم (Client-side)","لغة خاصة بتصميم قواعد البيانات فقط","لغة لطباعة المستندات","نظام تشغيل للحاسوب"],en:["Client-side interactive programming language","Database design language","Document printing language","Operating system"]}, correct:0 },
+  { q:{ar:"ما هو DOM في تطوير الويب؟",en:"What is DOM in web development?"}, options:{ar:["نموذج كائنات المستند (Document Object Model) للوصول وتعديل عناصر HTML","نظام أمان السيرفر","أداة لضغط الصور","قاعدة بيانات محلية"],en:["Document Object Model to access and modify HTML elements","Server security system","Image compression tool","Local database"]}, correct:0 },
+  { q:{ar:"مسار العميل وخادم الويب (Client-Server Architecture) يعني:",en:"Client-Server Architecture means:"}, options:{ar:["تواصل المتصفح (Client) مع الخادم (Server) لطلب وعرض البيانات","عمل الحاسوب بدون إنترنت نهائياً","حفظ الملفات في الفلاش ميموري","توليد الطاقة الكهربائية للموقع"],en:["Browser (Client) communicating with Server to request and display data","Computer working without internet","Saving files to flash memory","Generating power for site"]}, correct:0 },
+  { q:{ar:"خاصية التصميم المتجاوب (Responsive Design) تضمن:",en:"Responsive Design ensures that:"}, options:{ar:["توافق وعرض الموقع بسلاسة على مختلف أحجام الشاشات والأجهزة","ثبات حجم الموقع على الهواتف فقط","منع فتح الموقع من الأجهزة الذكية","بطء التحميل للملفات"],en:["Website displays smoothly across various screen sizes and devices","Fixed size on phones only","Preventing mobile access","Slow file loading"]}, correct:0 },
+  { q:{ar:"بروتوكول HTTP / HTTPS يُستخدم لـ:",en:"HTTP / HTTPS protocol is used to:"}, options:{ar:["نقل صفحات الويب وتأمين الاتصال عبر الإنترنت","إرسال الرسائل الصوتية فقط","تشغيل الطابعة عن بعد","تعديل إعدادات الراوتر"],en:["Transfer webpages and secure internet communication","Send voice messages only","Run remote printer","Edit router settings"]}, correct:0 },
+  { q:{ar:"مفهوم JavaScript Asynchronous (التعامل غير المتزامن) يتيح:",en:"JavaScript Asynchronous concept allows:"}, options:{ar:["تنفيذ المهام (مثل جلب بيانات API) دون تجميد المتصفح","إيقاف عمل الموقع بالكامل","حذف الكود البرمجي تلقائياً","منع تحميل الصور"],en:["Executing tasks (like fetching API data) without freezing browser","Stopping site completely","Auto deleting code","Preventing image loading"]}, correct:0 },
+  { q:{ar:"إطار العمل (Framework) في تطوير الويب مثل React أو Vue يُستخدم لـ:",en:"A web development framework like React or Vue is used to:"}, options:{ar:["بناء واجهات المستخدم الديناميكية المعقدة بكفاءة عالية","إصلاح أعطال شاشة الحاسوب","كتابة مستندات Word","تصميم شعارات الشركات"],en:["Building complex dynamic user interfaces efficiently","Fixing screen faults","Writing Word docs","Designing logos"]}, correct:0 },
+  { q:{ar:"أدوات مطوري المتصفح (Browser Developer Tools) تفيد في:",en:"Browser Developer Tools are useful for:"}, options:{ar:["فحص واختبار الأكواد، الأخطاء (Console)، وتعديل التصميم مؤقتاً","صيانة الأجهزة الصلبة","شراء نطاقات الإنترنت","تسجيل الدخول للجامعة"],en:["Inspecting code, debugging (Console), and temporarily modifying design","Hardware maintenance","Buying domains","University login"]}, correct:0 }
+ ],
+ "Principles of Finance": [
+  { q:{ar:"القيمة الزمنية للنقود (Time Value of Money) تعني أن:",en:"The Time Value of Money means that:"}, options:{ar:["الدولار اليوم يساوي أكثر من دولار في المستقبل بسبب قدرته على التوليد والاستثمار","قيمة النقود ثابتة لا تتغير أبداً","التضخم يلغي قيمة المال نهائياً","النقود تفقد قيمتها خلال ساعة واحدة"],en:["A dollar today is worth more than in the future due to investment capacity","Money value is constant","Inflation destroys money value","Money loses value within an hour"]}, correct:0 },
+  { q:{ar:"المخاطر والعائد (Risk and Return) في التمويل يرتبطان بـ:",en:"Risk and Return in finance are related such that:"}, options:{ar:["كلما زادت المخاطر المتوقعة، زاد العائد المطلوب والعكس صحيح","المخاطر العالية تعني دائماً خسارة مؤكدة بلا عائد","العائد المرتفع لا يحتاج مخاطر","المخاطر والعائد لا علاقة بينهما"],en:["Higher expected risk means higher required return and vice versa","High risk always means loss with no return","High return needs no risk","No relation between risk and return"]}, correct:0 },
+  { q:{ar:"هيكل رأس المال (Capital Structure) يتكون من:",en:"Capital Structure consists of:"}, options:{ar:["المزج بين الديون (Debt) وحقوق الملكية (Equity) لتمويل أصول الشركة","الأصول الثابتة والمتداولة فقط","المصروفات والإيرادات السنوية","الرواتب والأجور الشهرية"],en:["Mix of Debt and Equity to finance company assets","Fixed and current assets only","Annual expenses and revenues","Monthly wages"]}, correct:0 },
+  { q:{ar:"صافي القيمة الحالية (NPV) يُستخدم لـ:",en:"Net Present Value (NPV) is used to:"}, options:{ar:["تقييم وجدوى الاستثمار عبر خصم التدفقات النقدية المستقبلية","حساب الضرائب الشخصية","تحديد عدد العمال في المشروع","قياس سرعة الإنترنت"],en:["Evaluate investment feasibility by discounting future cash flows","Calculate personal taxes","Determine worker count","Measure internet speed"]}, correct:0 },
+  { q:{ar:"معدل العائد الداخلي (IRR) هو:",en:"Internal Rate of Return (IRR) is:"}, options:{ar:["معدل الخصم الذي يجعل صافي القيمة الحالية NPV يساوي صفراً","نسبة أرباح الأسهم الموزعة فقط","تكلفة الاقتراض البنكي الثابتة","معدل التضخم السنوي"],en:["Discount rate that makes NPV equal to zero","Dividend payout ratio","Fixed bank borrowing cost","Annual inflation rate"]}, correct:0 },
+  { q:{ar:"رأس المال العامل الصافي (Net Working Capital) يُحسب كالتالي:",en:"Net Working Capital is calculated as:"}, options:{ar:["الأصول المتداولة - الخصوم المتداولة","الأصول الثابتة + الديون طويلة الأجل","إجمالي الإيرادات - إجمالي المصروفات","رأس المال المدفوع - المسحوبات"],en:["Current Assets - Current Liabilities","Fixed Assets + Long-term debt","Total revenues - Total expenses","Paid capital - Drawings"]}, correct:0 },
+  { q:{ar:"الأسهم العادية (Common Stock) تمنح حامليها:",en:"Common Stock grants holders:"}, options:{ar:["حق التصويت في اجتماعات الشركة ونصيب في الأرباح (توزيعات)","فوائد ثابتة ومضمونة بغض النظر عن أرباح الشركة","أولوية مطلقة عند التصفية قبل الديون","وظيفة إدارية تلقائية"],en:["Voting rights and share in profits (dividends)","Fixed guaranteed interest","Absolute priority in liquidation","Automatic management job"]}, correct:0 },
+  { q:{ar:"السندات (Bonds) في التمويل تعتبر:",en:"Bonds in finance are considered:"}, options:{ar:["أدوات دين تصدرها الشركات أو الحكومات لاقتراض الأموال بفائدة محددة","حصص ملكية في رأس مال الشركة","أصول غير قابلة للبيع","منح مالية لا تُرد"],en:["Debt instruments issued by companies/governments to borrow money with interest","Ownership shares","Non-saleable assets","Non-refundable grants"]}, correct:0 },
+  { q:{ar:"الرافعة المالية (Financial Leverage) تعتمد على استخدام:",en:"Financial Leverage relies on using:"}, options:{ar:["التمويل بالديون ذات التكلفة الثابتة لتعظيم العائد المحتمل للملكية","النقد الشخصي فقط بدون اقتراض","المبيعات النقدية الفورية","الأسهم الممتازة فقط"],en:["Fixed-cost debt financing to maximize potential equity return","Personal cash only","Cash sales","Preferred stock only"]}, correct:0 },
+  { q:{ar:"تحليل التعادل (Break-even Analysis) يحدد:",en:"Break-even Analysis determines:"}, options:{ar:["حجم المبيعات أو الإيرادات الذي تتساوى عنده التكاليف مع الإيرادات (لا ربح ولا خسارة)","أعلى أرباح ممكنة للشركة","الحد الأقصى للضرائب","تكلفة المواد الخام"],en:["Sales volume where costs equal revenues (no profit, no loss)","Max possible profit","Max tax limit","Raw material cost"]}, correct:0 }
+ ],
+ "Probability & Statistics": [
+  { q:{ar:"المتوسط الحسابي (Mean) يُمثل:",en:"The Arithmetic Mean represents:"}, options:{ar:["مجموع القيم مقسوماً على عددهم الإجمالي","القيمة التي تقع في المنتصف تماماً بعد الترتيب","القيمة الأكثر تكراراً في البيانات","الفرق بين أكبر وأصغر قيمة"],en:["Sum of values divided by their total count","Value exactly in the middle after sorting","Most frequent value","Difference between max and min value"]}, correct:0 },
+  { q:{ar:"الوسيط (Median) هو:",en:"The Median is:"}, options:{ar:["القيمة المركزية التي تتوسط البيانات بعد ترتيبها تصاعدياً أو تنازلياً","مجموع القيم مقسوماً على عددها","القيمة الأكثر شيوعاً وتكراراً","مربع الانحراف المعياري"],en:["Central value dividing sorted data in half","Sum divided by count","Most common value","Square of standard deviation"]}, correct:0 },
+  { q:{ar:"المنوال (Mode) يُعرّف بأنه:",en:"The Mode is defined as:"}, options:{ar:["القيمة الأكثر تكراراً وشيوعاً بين البيانات","الفرق بين الحدين الأدنى والأعلى","متوسط المربعات","جذر التباين"],en:["Most frequent and common value in data","Range","Mean of squares","Square root of variance"]}, correct:0 },
+  { q:{ar:"التباين (Variance) يقيس مدى:",en:"Variance measures the:"}, options:{ar:["تشتت القيم وانحرافها عن متوسطها الحسابي","تركز القيم في نقطة واحدة فقط","طول البيانات","احتمال وقوع الحدث المستحيل"],en:["Dispersion of values and deviation from their mean","Concentration of values at one point","Data length","Probability of impossible event"]}, correct:0 },
+  { q:{ar:"الانحراف المعياري (Standard Deviation) هو:",en:"Standard Deviation is:"}, options:{ar:["الجذر التربيعي الموجب للتباين","مربع التباين","مجموع البيانات","الوسط الحسابي للبيانات"],en:["Positive square root of the variance","Square of variance","Sum of data","Mean of data"]}, correct:0 },
+  { q:{ar:"احتمال وقوع أي حدث مستحيل يساوي:",en:"The probability of an impossible event equals:"}, options:{ar:["صفر (0)","واحد صحيح (1)","نصف (0.5)","ما لا نهاية"],en:["Zero (0)","One (1)","Half (0.5)","Infinity"]}, correct:0 },
+  { q:{ar:"احتمال وقوع الحدث المؤكد يساوي:",en:"The probability of a sure event equals:"}, options:{ar:["واحد صحيح (1)","صفر (0)","عشرة (10)","سالب واحد (-1)"],en:["One (1)","Zero (0)","Ten (10)","Minus one (-1)"]}, correct:0 },
+  { q:{ar:"الاحتمال الشرطي (Conditional Probability) لحدث A بشرط وقوع B يكتب كالتالي:",en:"Conditional Probability of A given B is written as:"}, options:{ar:["P(A|B)","P(A + B)","P(A) * P(B)","P(A - B)"],en:["P(A|B)","P(A + B)","P(A) * P(B)","P(A - B)"]}, correct:0 },
+  { q:{ar:"التوزيع الطبيعي (Normal Distribution) يتخذ شكل:",en:"The Normal Distribution has the shape of:"}, options:{ar:["منحنى جرس متماثل (Bell-shaped curve)","خط مستقيم صاعد","دائرة كاملة","مربع متساوي الأضلاع"],en:["Symmetrical Bell-shaped curve","Rising straight line","Full circle","Square"]}, correct:0 },
+  { q:{ar:"معامل الارتباط (Correlation Coefficient) يقيس:",en:"The Correlation Coefficient measures:"}, options:{ar:["قوة واتجاه العلاقة الخطية بين متغيرين","حجم العينة الإحصائية فقط","الخطأ المعياري للمتوسط","مساحة التوزيع الطبيعي"],en:["Strength and direction of linear relationship between two variables","Sample size only","Standard error","Area of normal distribution"]}, correct:0 }
+ ],
+ "English Language III": [
+  { q:{ar:"In academic reading, skimming means:",en:"In academic reading, skimming means:"}, options:{ar:["Reading quickly to get the general idea or overview","Reading every single word slowly","Translating word by word into Arabic","Memorizing the text completely"],en:["Reading quickly to get the general idea or overview","Reading every single word slowly","Translating word by word into Arabic","Memorizing the text completely"]}, correct:0 },
+  { q:{ar:"Scanning a text involves:",en:"Scanning a text involves:"}, options:{ar:["Looking for specific information like dates, names, or keywords","Reading the whole book from cover to cover","Closing eyes and guessing","Ignoring the text headings"],en:["Looking for specific information like dates, names, or keywords","Reading the whole book from cover to cover","Closing eyes and guessing","Ignoring the text headings"]}, correct:0 },
+  { q:{ar:"A well-structured academic paragraph must contain:",en:"A well-structured academic paragraph must contain:"}, options:{ar:["A topic sentence, supporting sentences, and a concluding sentence","Only one long sentence","Random unrelated ideas","Only questions without answers"],en:["A topic sentence, supporting sentences, and a concluding sentence","Only one long sentence","Random unrelated ideas","Only questions without answers"]}, correct:0 },
+  { q:{ar:"Which of the following is a formal transition word for showing contrast?",en:"Which of the following is a formal transition word for showing contrast?"}, options:{ar:["However / Nevertheless","Furthermore / Moreover","First / Second","As a result / Therefore"],en:["However / Nevertheless","Furthermore / Moreover","First / Second","As a result / Therefore"]}, correct:0 },
+  { q:{ar:"Passive voice in scientific and technical writing is often used to:",en:"Passive voice in scientific and technical writing is often used to:"}, options:{ar:["Focus on the action and results rather than who performed it","Make the text very confusing","Avoid writing verbs","Express personal feelings"],en:["Focus on the action and results rather than who performed it","Make the text very confusing","Avoid writing verbs","Express personal feelings"]}, correct:0 },
+  { q:{ar:"Synonyms are words that have:",en:"Synonyms are words that have:"}, options:{ar:["Similar or nearly the same meanings","Opposite meanings","No relation at all","The same spelling but different sounds"],en:["Similar or nearly the same meanings","Opposite meanings","No relation at all","The same spelling but different sounds"]}, correct:0 },
+  { q:{ar:"Antonyms are words that have:",en:"Antonyms are words that have:"}, options:{ar:["Opposite meanings","The exact same meaning","Similar sounds","Plural forms"],en:["Opposite meanings","The exact same meaning","Similar sounds","Plural forms"]}, correct:0 },
+  { q:{ar:"Professional correspondence (like formal emails) should start with:",en:"Professional correspondence (like formal emails) should start with:"}, options:{ar:["Dear Mr./Ms. [Last Name] or Dear Sir/Madam","Hey buddy","What's up","No greeting needed"],en:["Dear Mr./Ms. [Last Name] or Dear Sir/Madam","Hey buddy","What's up","No greeting needed"]}, correct:0 },
+  { q:{ar:"In technical presentations, visual aids (like charts and graphs) help to:",en:"In technical presentations, visual aids (like charts and graphs) help to:"}, options:{ar:["Clarify complex data and keep audience engaged","Distract listeners","Fill up empty space on slides","Hide information"],en:["Clarify complex data and keep audience engaged","Distract listeners","Fill up empty space on slides","Hide information"]}, correct:0 },
+  { q:{ar:"Paraphrasing means:",en:"Paraphrasing means:"}, options:{ar:["Rewriting someone else's ideas in your own words while keeping the original meaning","Copying sentences word for word without citation","Deleting parts of the text","Translating text into another language"],en:["Rewriting someone else's ideas in your own words while keeping the original meaning","Copying sentences word for word without citation","Deleting parts of the text","Translating text into another language"]}, correct:0 }
+ ],
+ "Accounting I": [
+  { q:{ar:"المعادلة المحاسبية الأساسية هي:",en:"The basic accounting equation is:"}, options:{ar:["الأصول = الخصوم + حقوق الملكية","الأصول = الإيرادات - المصروفات","الخصوم = الأصول + رأس المال","صافي الدخل = الأصول - الخصوم"],en:["Assets = Liabilities + Equity","Assets = Revenues - Expenses","Liabilities = Assets + Capital","Net Income = Assets - Liabilities"]}, correct:0 },
+  { q:{ar:"طبيعة حساب الأصول هي:",en:"The normal balance of asset accounts is:"}, options:{ar:["دائن","مدين","محايد","إيراد"],en:["Credit","Debit","Neutral","Revenue"]}, correct:1 },
+  { q:{ar:"طبيعة حساب الخصوم وحقوق الملكية هي:",en:"The normal balance of liabilities and equity is:"}, options:{ar:["مدين","دائن","مصروف","مسحوبات"],en:["Debit","Credit","Expense","Drawings"]}, correct:1 },
+  { q:{ar:"دفتر الأستاذ يُستخدم في:",en:"The general ledger is used for:"}, options:{ar:["تسجيل العمليات فور وقوعها تاريخياً","تبويب وترحيل العمليات لكل حساب على حدة","حساب عدد الموظفين في الشركة","كتابة العقود القانونية"],en:["Recording transactions chronologically","Posting and classifying transactions into individual accounts","Counting employees","Writing legal contracts"]}, correct:1 },
+  { q:{ar:"ميزان المراجعة يُعد بهدف:",en:"The trial balance is prepared to:"}, options:{ar:["حساب الأرباح والخسائر فقط","التأكد من تساوي مجموع الأرصدة المدينة والدائنة","تقييم أداء الموظفين","تحديد الضرائب المستحقة"],en:["Calculate profit and loss only","Ensure total debit and credit balances are equal","Evaluate performance","Determine taxes"]}, correct:1 },
+  { q:{ar:"أساس المحاسبة الذي يعترف بالإيرادات عند تحصيلها نقداً هو:",en:"The accounting basis that recognizes revenues when cash is received is:"}, options:{ar:["أساس الاستحقاق","الأساس النقدي","الأساس التاريخي","أساس المقابلة"],en:["Accrual basis","Cash basis","Historical cost basis","Matching principle"]}, correct:1 },
+  { q:{ar:"قائمة الدخل تعرض:",en:"The income statement shows:"}, options:{ar:["الأصول والخصوم في لحظة معينة","الإيرادات والمصروفات ونتيجة النشاط من ربح أو خسارة","حركة النقدية الداخلة والخارجة فقط","أسماء الشركاء وحصصهم"],en:["Assets and liabilities at a specific point","Revenues, expenses, and net income or loss","Cash inflows and outflows only","Partners' names and shares"]}, correct:1 },
+  { q:{ar:"قائمة المركز المالي (الميزانية) تحتوي على:",en:"The balance sheet contains:"}, options:{ar:["الإيرادات والمصروفات","الأصول والخصوم وحقوق الملكية","التدفقات النقدية التشغيلية","الأجور والرواتب"],en:["Revenues and expenses","Assets, liabilities, and equity","Operating cash flows","Wages and salaries"]}, correct:1 },
+  { q:{ar:"المصروفات بطبيعتها:",en:"Expenses naturally have a:"}, options:{ar:["دائنة","مدينة","ليس لها طبيعة","أصول ثابتة"],en:["Credit balance","Debit balance","No nature","Fixed asset status"]}, correct:1 },
+  { q:{ar:"الإيرادات بطبيعتها:",en:"Revenues naturally have a:"}, options:{ar:["مدينة","دائنة","التزامات","مصروفات"],en:["Debit balance","Credit balance","Liability status","Expense status"]}, correct:1 }
+ ],
+ "Arabic Language II": [
+  { q:{ar:"الأفعال الخمسة تُرفع بـ:",en:"The five verbs are nominative with:"}, options:{ar:["الضمة الظاهرة","ثبوت النون","حذف النون","الواو"],en:["Visible Damma","Thubut An-Nun","Dropping An-Nun","Waw"]}, correct:1 },
+  { q:{ar:"الممنوع من الصرف يُجر بـ:",en:"Diptotes are genitive with:"}, options:{ar:["الكسرة الظاهرة","الفتحة نيابة عن الكسرة","الياء دائماً","السكون"],en:["Visible Kasra","Fatha in place of Kasra","Ya always","Sukoon"]}, correct:1 },
+  { q:{ar:"الفعل اللازم هو الذي:",en:"The intransitive verb is one that:"}, options:{ar:["ينصب مفعولين","يكتفي بفاعله ولا يحتاج لمفعول به","يتعدى لمفعول به واحد","لا يأتي إلا في الماضي"],en:["Takes two objects","Suffices with its subject and needs no object","Takes one object","Only occurs in past tense"]}, correct:1 },
+  { q:{ar:"الحال في جملة (جاء الطالب متبسماً) هو:",en:"The Hal in 'The student came smiling' is:"}, options:{ar:["فاعل","حال منصوب وعلامة نصبه الفتحة","مفعول به","نعت مرفوع"],en:["Subject","Hal accusative with Fatha","Object","Adjective"]}, correct:1 },
+  { q:{ar:"المفعول المطلق هو:",en:"Al-Maf'ul Al-Mutlaq is:"}, options:{ar:["اسم منصوب يؤكد الفعل أو يبين نوعه أو عدده","اسم مرفوع يدل على وقت الفعل","مجرور بحرف جر","صفة للموصوف"],en:["An accusative noun emphasizing or explaining the verb","A nominative noun showing time","Genitive with preposition","An adjective"]}, correct:0 },
+  { q:{ar:"التوكيد المعنوي يكون بألفاظ مثل:",en:"Moral emphasis uses words like:"}, options:{ar:["ذهب، كتب، قرأ","نفس، عين، كل، جميع","من، عن، في","هذا، هذه، هؤلاء"],en:["Went, wrote, read","Nafs, 'Ayn, Kull, Jami'","Min, 'An, Fi","Hatha, Hathihi, Ha'ula'"]}, correct:1 },
+  { q:{ar:"همزة القطع تُكتب:",en:"Hamzat Al-Qat' is written:"}, options:{ar:["في أول الكرسي فقط","فوق الألف أو تحتها وتُنطق في كل حال","بدون ألف نهائياً","في آخر الكلمة فقط"],en:["At the start of the chair only","Above or below the Alif and pronounced always","Without Alif completely","At the end only"]}, correct:1 },
+  { q:{ar:"المستثنى بـ (إلا) في الكلام التام الموجب يكون:",en:"The exception with (Illa) in a complete positive sentence is:"}, options:{ar:["واجب النصب","جوازاً بدلاً","مجروراً دائماً","مرفوعاً دائماً"],en:["Mandatory accusative","Optional substitute","Always genitive","Always nominative"]}, correct:0 },
+  { q:{ar:"الحرف الذي يفيد النفي من الحروف الآتية هو:",en:"Which of the following letters indicates negation?"}, options:{ar:["هل","لم","يا","إنْ الشرطية"],en:["Hal","Lam","Ya","In conditional"]}, correct:1 },
+  { q:{ar:"إعراب الفعل المضارع المسبوق بحرف نصب (مثل: لن يكسلَ الطالبُ):",en:"The parsing of a present verb preceded by a nasal particle:"}, options:{ar:["مجزوم بالسكون","منصوب بالفتحة الظاهرة","مرفوع بالضمة","مبني على الفتح"],en:["Jazm with Sukoon","Nasb with visible Fatha","Raf' with Damma","Built on Fatha"]}, correct:1 }
+ ],
+ "Calculus": [
+  { q:{ar:"مشتقة الدالة الثابتة c تساوي:",en:"The derivative of a constant function c is:"}, options:{ar:["c نفسها","صفر","1","x"],en:["c itself","Zero","1","x"]}, correct:1 },
+  { q:{ar:"مشتقة x^3 هي:",en:"The derivative of x^3 is:"}, options:{ar:["3x^2","x^2","3x^3","6x"],en:["3x^2","x^2","3x^3","6x"]}, correct:0 },
+  { q:{ar:"مشتقة sin(x) هي:",en:"The derivative of sin(x) is:"}, options:{ar:["-sin(x)","cos(x)","-cos(x)","tan(x)"],en:["-sin(x)","cos(x)","-cos(x)","tan(x)"]}, correct:1 },
+  { q:{ar:"قاعدة السلسلة (Chain Rule) تُستخدم لـ:",en:"The Chain Rule is used for:"}, options:{ar:["تكامل الدوال البسيطة","اشتقاق الدوال المركبة","إيجاد النهايات","حساب المساحات"],en:["Integrating simple functions","Differentiating composite functions","Finding limits","Calculating areas"]}, correct:1 },
+  { q:{ar:"التكامل غير المحدود لـ x^2 dx هو:",en:"The indefinite integral of x^2 dx is:"}, options:{ar:["2x + C","(x^3)/3 + C","x^3 + C","3x^3 + C"],en:["2x + C","(x^3)/3 + C","x^3 + C","3x^3 + C"]}, correct:1 },
+  { q:{ar:"التفسير الهندسي للمشتقة الأولى هو:",en:"The geometric interpretation of the first derivative is:"}, options:{ar:["المساحة تحت المنحنى","ميل المماس لمنحنى الدالة عند نقطة","نقطة التقاطع مع محور الصادات","حجم المجسم الدوراني"],en:["Area under the curve","Slope of the tangent line to the curve at a point","Y-intercept","Solid volume"]}, correct:1 },
+  { q:{ar:"النقطة الحرجة للدالة تُوجد عندما تكون المشتقة الأولى:",en:"A critical point of a function occurs when the first derivative is:"}, options:{ar:["مساوية للصفر أو غير معرفة","موجبة دائماً","سالبة دائماً","تساوي واحد"],en:["Zero or undefined","Always positive","Always negative","Equal to one"]}, correct:0 },
+  { q:{ar:"مشتقة e^x هي:",en:"The derivative of e^x is:"}, options:{ar:["x * e^(x-1)","e^x نفسها","ln(x)","1/x"],en:["x * e^(x-1)","e^x itself","ln(x)","1/x"]}, correct:1 },
+  { q:{ar:"تكامل 1/x dx يساوي:",en:"The integral of 1/x dx is:"}, options:{ar:["-1/x^2 + C","ln|x| + C","e^x + C","x^2 + C"],en:["-1/x^2 + C","ln|x| + C","e^x + C","x^2 + C"]}, correct:1 },
+  { q:{ar:"اختبار المشتقة الثانية يُستخدم لمعرفة:",en:"The second derivative test is used to find:"}, options:{ar:["التقعر والنقاط العظمى والصغرى المحلية","مشتقة الدوال المثلثية العكسية","نهاية الدالة عند ما لا نهاية","طول منحنى الدالة"],en:["Concavity and local extrema","Inverse trig derivatives","Limit at infinity","Arc length"]}, correct:0 }
+ ],
+ "Computer Applications for Business": [
+  { q:{ar:"الدالة المستخدمة لإيجاد المجموع في Excel هي:",en:"The function used to find the sum in Excel is:"}, options:{ar:["AVERAGE","SUM","COUNT","MAX"],en:["AVERAGE","SUM","COUNT","MAX"]}, correct:1 },
+  { q:{ar:"المرجع الذي يثبت الصف أو العمود باستخدام علامة الدولار ($) يسمى:",en:"A reference that locks a row or column using a dollar sign ($) is called:"}, options:{ar:["مرجع نسبي","مرجع مطلق","مرجع دائري","مرجع تلقائي"],en:["Relative reference","Absolute reference","Circular reference","Auto reference"]}, correct:1 },
+  { q:{ar:"الدالة الشرطية في إكسل هي:",en:"The conditional function in Excel is:"}, options:{ar:["SUMIF","IF","VLOOKUP","COUNT"],en:["SUMIF","IF","VLOOKUP","COUNT"]}, correct:1 },
+  { q:{ar:"وظيفة دالة VLOOKUP هي:",en:"The function of VLOOKUP is:"}, options:{ar:["حساب المعدل","البحث عن قيمة رأسياً في عمود وإرجاع قيمة مقابلة","دمج النصوص","حساب الجذر التربيعي"],en:["Calculate average","Search vertically in a column and return a corresponding value","Concatenate text","Calculate square root"]}, correct:1 },
+  { q:{ar:"الفرق بين COUNT و COUNTA أن COUNT تعد:",en:"The difference between COUNT and COUNTA is that COUNT counts:"}, options:{ar:["الخلايا النصية فقط","الخلايا الرقمية فقط","جميع الخلايا الفارغة","الخلايا الملونة فقط"],en:["Text cells only","Numeric cells only","All blank cells","Colored cells only"]}, correct:1 },
+  { q:{ar:"لفرز وترتيب البيانات في جداول إكسل نستخدم أداة:",en:"To sort and arrange data in Excel tables, we use:"}, options:{ar:["Filter & Sort","Chart","Formula","Protect Sheet"],en:["Filter & Sort","Chart","Formula","Protect Sheet"]}, correct:0 },
+  { q:{ar:"ملف إكسل يسمى عادة بـ:",en:"An Excel file is commonly called a:"}, options:{ar:["ورقة عمل (Worksheet)","مصنف (Workbook)","قاعدة بيانات (Database)","مستند (Document)"],en:["Worksheet","Workbook","Database","Document"]}, correct:1 },
+  { q:{ar:"الرمز الذي يبدأ به أي معادلة أو دالة في إكسل هو:",en:"The symbol that starts any formula or function in Excel is:"}, options:{ar:["#","=","+","@"],en:["#","=","+","@"]}, correct:1 },
+  { q:{ar:"الدالة المسؤولة عن إيجاد أعلى قيمة في نطاق خلايا هي:",en:"The function responsible for finding the highest value in a range is:"}, options:{ar:["MIN","MAX","AVERAGE","SUM"],en:["MIN","MAX","AVERAGE","SUM"]}, correct:1 },
+  { q:{ar:"لحماية ورقة العمل من التعديل غير المسموح به نستخدم:",en:"To protect a worksheet from unauthorized modification, we use:"}, options:{ar:["Format Cells","Protect Sheet","Conditional Formatting","Data Validation"],en:["Format Cells","Protect Sheet","Conditional Formatting","Data Validation"]}, correct:1 }
+ ],
+ "English Language II": [
+  { q:{ar:"Present Simple tense is used for:",en:"Present Simple tense is used for:"}, options:{ar:["Actions happening right now","Habits and general truths","Completed past actions","Future plans only"],en:["Actions happening right now","Habits and general truths","Completed past actions","Future plans only"]}, correct:1 },
+  { q:{ar:"The past simple form of the irregular verb \"go\" is:",en:"The past simple form of the irregular verb \"go\" is:"}, options:{ar:["goed","going","went","gone"],en:["goed","going","went","gone"]}, correct:2 },
+  { q:{ar:"Which of the following is a modal verb?",en:"Which of the following is a modal verb?"}, options:{ar:["Run","Must","Table","Beautiful"],en:["Run","Must","Table","Beautiful"]}, correct:1 },
+  { q:{ar:"We use \"going to\" for:",en:"We use \"going to\" for:"}, options:{ar:["Instant decisions made now","Pre-planned intentions and future predictions based on evidence","Past habits","Conditional clauses"],en:["Instant decisions made now","Pre-planned intentions and future predictions based on evidence","Past habits","Conditional clauses"]}, correct:1 },
+  { q:{ar:"Uncountable nouns:",en:"Uncountable nouns:"}, options:{ar:["Can be counted with numbers like 1, 2, 3","Do not have plural forms (e.g., water, advice)","Always take plural verbs","Use \"an\" before them"],en:["Can be counted with numbers like 1, 2, 3","Do not have plural forms (e.g., water, advice)","Always take plural verbs","Use \"an\" before them"]}, correct:1 },
+  { q:{ar:"The superlative form of \"tall\" is:",en:"The superlative form of \"tall\" is:"}, options:{ar:["taller","the tallest","more tall","tallest than"],en:["taller","the tallest","more tall","tallest than"]}, correct:1 },
+  { q:{ar:"Relative pronouns include words like:",en:"Relative pronouns include words like:"}, options:{ar:["and, but, because","who, which, that","in, on, at","he, she, they"],en:["and, but, because","who, which, that","in, on, at","he, she, they"]}, correct:1 },
+  { q:{ar:"In the passive voice, the focus is on:",en:"In the passive voice, the focus is on:"}, options:{ar:["The person doing the action","The action or the receiver of the action","The time of the event","The speaker's opinion"],en:["The person doing the action","The action or the receiver of the action","The time of the event","The speaker's opinion"]}, correct:1 },
+  { q:{ar:"Present Perfect tense is formed using:",en:"Present Perfect tense is formed using:"}, options:{ar:["have/has + past participle (V3)","did + base verb","is/are + V-ing","had + V3"],en:["have/has + past participle (V3)","did + base verb","is/are + V-ing","had + V3"]}, correct:0 },
+  { q:{ar:"A word used to show contrast or link ideas is:",en:"A word used to show contrast or link ideas is:"}, options:{ar:["However","Table","Chair","Quickly"],en:["However","Table","Chair","Quickly"]}, correct:0 }
+ ],
+ "Fundamentals of Information Systems": [
+  { q:{ar:"المكونات الخمسة الأساسية لنظم المعلومات هي:",en:"The five core components of information systems are:"}, options:{ar:["الأجهزة، البرمجيات، البيانات، الإجراءات، العنصر البشري","الشاشات، الطابعات، الأسلاك، الماوس، لوحة المفاتيح","الإنترنت، الشبكة، الراوتر، السيرفر، الحوسبة","الإدارة، المال، الموظفون، الأرباح، الأسواق"],en:["Hardware, software, data, procedures, people","Screens, printers, cables, mouse, keyboard","Internet, network, router, server, computing","Management, money, employees, profits, markets"]}, correct:0 },
+  { q:{ar:"الفرق بين البيانات والمعلومات أن البيانات هي:",en:"The difference between data and information is that data is:"}, options:{ar:["حقائق خام ومواد أولية لم تتم معالجتها","نتائج نهائية جاهزة لاتخاذ القرار","تقارير إدارية ملخصة","برمجيات تشغيل الحاسب"],en:["Raw facts and unpolished materials","Final results ready for decision making","Summarized management reports","Computer operating software"]}, correct:0 },
+  { q:{ar:"نظم دعم القرار (DSS) تُستخدم أساساً لـ:",en:"Decision Support Systems (DSS) are mainly used to:"}, options:{ar:["تسجيل العمليات اليومية الروتينية","مساعدة الإدارة في اتخاذ قرارات شبه مهيكلة وغير مهيكلة","طباعة الفواتير للموظفين","حماية الشبكة من الفيروسات"],en:["Record routine daily operations","Help management make semi-structured and unstructured decisions","Print employee invoices","Protect the network from viruses"]}, correct:1 },
+  { q:{ar:"مرحلة البداية في دورة حياة تطوير النظم (SDLC) هي:",en:"The initial phase in the System Development Life Cycle (SDLC) is:"}, options:{ar:["التخطيط (Planning)","البرمجة الفورية","الصيانة","التسويق"],en:["Planning","Instant programming","Maintenance","Marketing"]}, correct:0 },
+  { q:{ar:"حماية البيانات من السرقة والتلف وضمان سريتها يُعرف بـ:",en:"Protecting data from theft and damage and ensuring confidentiality is known as:"}, options:{ar:["أمن المعلومات (Information Security)","قواعد البيانات العلائقية","التجارة الإلكترونية","الحوسبة السحابية"],en:["Information Security","Relational databases","E-commerce","Cloud computing"]}, correct:0 },
+  { q:{ar:"قاعدة البيانات تتميز عن الملفات التقليدية بـ:",en:"A database differs from traditional files by:"}, options:{ar:["تقليل تكرار البيانات وتكاملها","زيادة حجم الملفات بلا داعي","صعوبة الاسترجاع","عدم توفير صلاحيات أمان"],en:["Reducing data redundancy and integrity","Unnecessarily increasing file size","Difficulty in retrieval","Lacking security permissions"]}, correct:0 },
+  { q:{ar:"نموذج تقديم خدمات الحوسبة والتخزين عبر الإنترنت حسب الطلب يسمى:",en:"The model of providing computing and storage services over the internet on-demand is called:"}, options:{ar:["الحوسبة السحابية (Cloud Computing)","الشبكات المحلية (LAN)","البرمجيات المفتوحة","معالجة الدفعات"],en:["Cloud Computing","Local Area Network (LAN)","Open source software","Batch processing"]}, correct:0 },
+  { q:{ar:"إجراء المعاملات التجارية وبيع المنتجات عبر شبكات الإنترنت يسمى:",en:"Conducting commercial transactions and selling products over the internet is called:"}, options:{ar:["التجارة الإلكترونية (E-Commerce)","الحكومة الإلكترونية","البريد الصوتي","الإدارة المالية"],en:["E-Commerce","E-government","Voicemail","Financial management"]}, correct:0 },
+  { q:{ar:"النظام الذي يسجل العمليات والمعاملات التشغيلية اليومية المتكررة هو:",en:"The system that records repetitive daily operational transactions is:"}, options:{ar:["نظم معالجة المعاملات (TPS)","نظم دعم التنفيذ","نظم الذكاء الاصطناعي","نظم إدارة علاقات العملاء"],en:["Transaction Processing Systems (TPS)","Executive support systems","AI systems","CRM systems"]}, correct:0 },
+  { q:{ar:"تحليل النظم يعني:",en:"Systems analysis means:"}, options:{ar:["دراسة النظام الحالي وتحديد متطلبات النظام الجديد","كتابة أكواد لغة C++","إصلاح أعطال الأجهزة الصلبة","بيع الأجهزة للمؤسسة"],en:["Studying the current system and defining requirements for the new one","Writing C++ code","Repairing hardware faults","Selling hardware to the organization"]}, correct:0 }
+ ],
+ "Islamic Studies II": [
+  { q:{ar:"الأسرة في الإسلام تُعتبر:",en:"The family in Islam is considered:"}, options:{ar:["النواة الأساسية لبناء المجتمع والمبنية على المودة والرحمة","مؤسسة اقتصادية بحتة","تجمع مؤقت بلا روابط","قطاع حكومي خدمي"],en:["The core nucleus of society built on affection and mercy","A purely economic institution","A temporary bondless gathering","A government service sector"]}, correct:0 },
+  { q:{ar:"من مقاصد الشريعة الإسلامية الكلية (الضروريات الخمس):",en:"Among the overall objectives of Islamic Sharia (the five necessities) are:"}, options:{ar:["حفظ الدين، النَفْس، العقل، المال، والنسل","جمع الأموال وزيادة الأرباح التجارية","بناء ناطحات السحاب والمصانع","السفر والسياحة الخارجية"],en:["Preservation of religion, life, intellect, wealth, and lineage","Accumulating wealth and increasing commercial profits","Building skyscrapers and factories","External travel and tourism"]}, correct:0 },
+  { q:{ar:"القاعدة الأصلية في المعاملات المالية والعادية في الإسلام هي:",en:"The fundamental rule in financial and routine transactions in Islam is:"}, options:{ar:["الإباحة والجواز ما لم يرد نص بتحريمها","التحريم المطلق حتى يثبت العكس","التوقف عن كل معاملة جديدة","الرجوع للعرف الغربي"],en:["Permissibility unless text prohibits it","Absolute prohibition until proven otherwise","Stopping every new transaction","Returning to Western custom"]}, correct:0 },
+  { q:{ar:"تحريم الربا في الاقتصاد الإسلامي يهدف إلى:",en:"The prohibition of Riba (usury) in the Islamic economy aims to:"}, options:{ar:["حماية الأموال من استغلال المحتاجين وتحقيق العدالة الاجتماعية","إيقاف عجلة الاستثمار نهائياً","تشجيع الاحتكار","إفلاس البنوك"],en:["Protect money from exploiting the needy and achieve social justice","Stop investment entirely","Encourage monopoly","Bankrupt banks"]}, correct:0 },
+  { q:{ar:"الشورى في نظام الحكم وإدارة شؤون المجتمع تعتبر:",en:"Shura (consultation) in governance and managing community affairs is considered:"}, options:{ar:["مبدأً إسلامياً أصيلاً لتدبير الأمور واتخاذ القرارات","أمراً اختيارياً لا أهمية له","تقليداً مأخوذاً من غير المسلمين","محرمة شرعاً"],en:["An authentic Islamic principle for managing affairs and decision-making","An optional unimportant matter","A tradition taken from non-Muslims","Sharia-forbidden"]}, correct:0 },
+  { q:{ar:"من أخلاقيات العمل والمهنة في الإسلام:",en:"Among work and professional ethics in Islam are:"}, options:{ar:["الإتقان، الأمانة، الصدق، والوفاء بالعقود","الغش لتحقيق أرباح أسرع","التهاون في أوقات العمل","إخفاء عيوب السلع"],en:["Excellence, honesty, truthfulness, and honoring contracts","Cheating for faster profits","Neglecting work hours","Hiding product defects"]}, correct:0 },
+  { q:{ar:"حقوق الإنسان في الإسلام تتميز بأنها:",en:"Human rights in Islam are characterized as being:"}, options:{ar:["ربانية المصدر، ثابتة، وشاملة لكرامة الإنسان","متغيرة حسب أهواء الحكام","خاصة بطبقة معينة دون غيرها","تمنح بشروط تعسفية"],en:["Divine in source, steady, and comprehensive of human dignity","Changing according to rulers' whims","Specific to a certain class only","Granted under arbitrary conditions"]}, correct:0 },
+  { q:{ar:"الزكاة في النظام الاقتصادي الإسلامي تعتبر:",en:"Zakat in the Islamic economic system is considered:"}, options:{ar:["ركناً مالياً فرضيّاً لتطهير الأموال ومساعدة الفقراء","ضريبة اختيارية تدفع حسب الرغبة","تبرعاً خيريّاً غير ملزم","رسوم إدارية للدولة"],en:["A mandatory financial pillar to purify wealth and help the poor","An optional tax paid by desire","A non-binding charity","Administrative state fees"]}, correct:0 },
+  { q:{ar:"من وسائل حماية المجتمع الإسلامي من الجريمة:",en:"Among the ways to protect the Islamic society from crime are:"}, options:{ar:["التربية الإيمانية، إقامة العدل، والتشريعات الرادعة","إشاعة الفوضى والحرية المطلقة","إلغاء العقوبات القانونية","الجهل والتخلف المتعمد"],en:["Faith education, establishing justice, and deterrent legislation","Spreading chaos and absolute freedom","Canceling legal punishments","Deliberate ignorance and backwardness"]}, correct:0 },
+  { q:{ar:"أساس العلاقات الدولية في الإسلام مع الآخرين هو:",en:"The basis of international relations in Islam with others is:"}, options:{ar:["السلام، العدل، التعاون البناء، والوفاء بالعهود","العداء الدائم والحروب المستمرة","العزلة التامة عن العالم","فرض الرأي بالقوة"],en:["Peace, justice, constructive cooperation, and fulfilling covenants","Permanent hostility and continuous wars","Total isolation from the world","Imposing opinion by force"]}, correct:0 }
+ ],
+ "Managing People": [
+  { q:{ar:"إدارة الموارد البشرية تهتم بـ:",en:"Human Resource Management focuses on:"}, options:{ar:["استقطاب وتطوير وإدارة العنصر البشري بكفاءة في المنظمة","صيانة أجهزة الحاسوب والشبكات","حساب الأرباح والخسائر مالياً","شراء المواد الخام للمصنع"],en:["Attracting, developing, and efficiently managing human capital","Maintaining computers and networks","Calculating financial profit and loss","Buying raw materials"]}, correct:0 },
+  { q:{ar:"تحليل الوظيفة (Job Analysis) يهدف إلى:",en:"Job Analysis aims to:"}, options:{ar:["تحديد واجبات ومهام ومسؤوليات وظروف أداء الوظيفة","تحديد أجر الموظف فقط","فصل الموظفين القدامى","تقييم أرباح الأسهم"],en:["Determine duties, tasks, responsibilities, and working conditions","Determine employee pay only","Fire old employees","Evaluate stock profits"]}, correct:0 },
+  { q:{ar:"عملية تقييم الأداء الوظيفي تساعد في:",en:"Performance appraisal helps in:"}, options:{ar:["قياس إنجاز الموظفين وتحديد الاحتياجات التدريبية","زيادة ساعات العمل الإجبارية","خفض رواتب العاملين","إلغاء الإجازات السنوية"],en:["Measuring employee achievement and identifying training needs","Increasing mandatory work hours","Lowering salaries","Canceling annual leaves"]}, correct:0 },
+  { q:{ar:"التحفيز (Motivation) في بيئة العمل هو:",en:"Motivation in the work environment is:"}, options:{ar:["القوى الداخلية والخارجية التي تحرك وتدفع الفرد لبذل الجهد","إجبار الموظف بالقوة على العمل","تقليل الحوافز المالية","تجاهل إنجازات العاملين"],en:["Internal and external forces driving an individual to exert effort","Forcing an employee to work","Reducing financial incentives","Ignoring employee achievements"]}, correct:0 },
+  { q:{ar:"دراسة السلوك التنظيمي تركز على:",en:"Organizational behavior study focuses on:"}, options:{ar:["سلوك الأفراد والجماعات وتأثيرهم على بيئة العمل التنظيمية","حركة الأسهم في بورصة الأسواق المالية","تصميم البرمجيات وقواعد البيانات","القواعد القانونية للدستور"],en:["Individual and group behavior and their impact on the organizational environment","Stock market movements","Software and database design","Constitutional legal rules"]}, correct:0 },
+  { q:{ar:"القيادة الفعالة في المؤسسات تتميز بـ:",en:"Effective leadership in organizations is characterized by:"}, options:{ar:["إلهام العاملين، توجيههم نحو الأهداف، وحل النزاعات","التسلط واتخاذ القرارات الفردية المطلقة","إهمال آراء المرؤوسين","تجنب التواصل مع فريق العمل"],en:["Inspiring employees, guiding them toward goals, and resolving conflicts","Autocracy and absolute individual decisions","Ignoring subordinates' views","Avoiding team communication"]}, correct:0 },
+  { q:{ar:"من استراتيجيات التعامل مع الصراع التنظيمي:",en:"Strategies for dealing with organizational conflict include:"}, options:{ar:["التفاوض، التعاون، التسوية، والحلول الوسطى","تأجيج المشاكل وتوسيع نطاق الخلاف","إقالة جميع أطراف النزاع فوراً","تجاهل المشكلة حتى تتفاقم"],en:["Negotiation, cooperation, compromise, and middle grounds","Fueling problems and expanding conflict","Firing all conflicting parties immediately","Ignoring the problem until it worsens"]}, correct:0 },
+  { q:{ar:"عملية اختيار وتعيين الموظفين الجدد تتضمن:",en:"The process of selecting and hiring new employees includes:"}, options:{ar:["الفرز، المقابلات الشخصية، والاختبارات المهنية","القبول العشوائي دون مقابلات","اختيار أقارب الإدارة فقط","التعيين بلا شروط"],en:["Screening, personal interviews, and professional tests","Random acceptance without interviews","Choosing management relatives only","Unconditional hiring"]}, correct:0 },
+  { q:{ar:"التدريب والتطوير المستمر للعاملين يؤدي إلى:",en:"Continuous training and development for workers leads to:"}, options:{ar:["رفع الكفاءة الإنتاجية ومواكبة متطلبات العمل المتغيرة","زيادة هدر الوقت والمال","ركود المهارات المهنية","كثرة الأخطاء التشغيلية"],en:["Raising production efficiency and keeping pace with changing work requirements","Increasing waste of time and money","Stagnation of professional skills","Frequent operational errors"]}, correct:0 },
+  { q:{ar:"خصائص فريق العمل الناجح تشمل:",en:"Characteristics of a successful work team include:"}, options:{ar:["الأهداف المشتركة، الثقة المتبادلة، والتواصل الفعال","الصراع المستمر وانعدام الثقة","غياب التعاون وتوزيع المهام عشوائياً","تفرد شخص واحد بالقرار"],en:["Common goals, mutual trust, and effective communication","Continuous conflict and lack of trust","Absence of cooperation and random task distribution","One person monopolizing decisions"]}, correct:0 }
+ ],
+ "Programming Methods I": [
+  { q:{ar:"الدالة الرئيسية التي يبدأ تنفيذ برنامج C++ منها هي:",en:"The main function from which a C++ program starts execution is:"}, options:{ar:["void start()","int main()","begin()","run_program()"],en:["void start()","int main()","begin()","run_program()"]}, correct:1 },
+  { q:{ar:"نوع البيانات المناسب لتخزين الأعداد الصحيحة في C++ هو:",en:"The appropriate data type for storing integers in C++ is:"}, options:{ar:["float","int","char","string"],en:["float","int","char","string"]}, correct:1 },
+  { q:{ar:"الأمر المستخدم لإدخال البيانات من المستخدم في C++ هو:",en:"The command used to input data from the user in C++ is:"}, options:{ar:["cout","cin","print","scanf"],en:["cout","cin","print","scanf"]}, correct:1 },
+  { q:{ar:"الجملة الشرطية التي تختبر عدة حالات باختيارات متعددة هي:",en:"The conditional statement that tests multiple cases with multiple choices is:"}, options:{ar:["if-else فقط","switch","cin","array"],en:["if-else only","switch","cin","array"]}, correct:1 },
+  { q:{ar:"الحلقة التكرارية المناسبة للتكرار عدد معلوم من المرات هي:",en:"The appropriate loop for repeating a known number of times is:"}, options:{ar:["for loop","while loop","do-while loop","if statement"],en:["for loop","while loop","do-while loop","if statement"]}, correct:0 },
+  { q:{ar:"المصفوفة (Array) هي:",en:"An array is:"}, options:{ar:["متغير يخزن قيمة واحدة فقط","هيكل بيانات يجمع عناصر من نفس النوع تحت اسم واحد","دالة رياضية جاهزة","مكتبة برمجية للنظام"],en:["A variable storing only one value","A data structure collecting elements of the same type under one name","A ready-made mathematical function","A system library code"]}, correct:1 },
+  { q:{ar:"التمرير بالمرجع (Pass by Reference) في الدوال يتم باستخدام الرمز:",en:"Pass by reference in functions is done using the symbol:"}, options:{ar:["*","&","#","$"],en:["*","&","#","$"]}, correct:1 },
+  { q:{ar:"المؤشرات (Pointers) هي متغيرات تُستخدم لتخزين:",en:"Pointers are variables used to store:"}, options:{ar:["القيم الرقمية مباشرة","عناوين الذاكرة للمتغيرات الأخرى","النصوص الطويلة فقط","أسماء الدوال"],en:["Numeric values directly","Memory addresses of other variables","Long texts only","Function names"]}, correct:1 },
+  { q:{ar:"المكتبة الأساسية للتعامل مع عمليات الإدخال والإخراج القياسية في C++ هي:",en:"The essential library for handling standard input/output operations in C++ is:"}, options:{ar:["<iostream>","<cmath>","<string>","<vector>"],en:["<iostream>","<cmath>","<string>","<vector>"]}, correct:0 },
+  { q:{ar:"الفرق الأساسي بين while و do-while أن do-while تضمن تنفيذ الكود:",en:"The main difference between while and do-while is that do-while guarantees executing the code:"}, options:{ar:["مرة واحدة على الأقل قبل التحقق من الشرط","ألا ينفذ أبداً","بشكل لا نهائي دائماً","بدون استخدام شروط"],en:["At least once before checking the condition","Never to execute","Infinitely always","Without using conditions"]}, correct:0 }
+ ],
+ "Sudanese Studies": [
+  { q:{ar:"استقل السودان وأعلن دولة مستقلة في تاريخ:",en:"Sudan became independent and declared as an independent state on:"}, options:{ar:["1 يناير 1956م","25 ديسمبر 1960م","14 يوليو 1952م","30 نوفمبر 1955م"],en:["January 1, 1956","December 25, 1960","July 14, 1952","November 30, 1955"]}, correct:0 },
+  { q:{ar:"يتميز السودان جغرافياً بـ:",en:"Sudan is geographically characterized by:"}, options:{ar:["مروره بنهر النيل وتنوع مناخه وبيئاته","كونه صحراء قاحلة بالكامل","عدم وجود مصادر مياه","وقوعه في أمريكا اللاتينية"],en:["The Nile River passing through it and diverse climate/environments","Being entirely a barren desert","Lacking water sources","Being located in Latin America"]}, correct:0 },
+  { q:{ar:"من أبرز الحضارات التاريخية القديمة في السودان:",en:"Among the most prominent ancient historical civilizations in Sudan are:"}, options:{ar:["مملكة كوش وحضارة نبتة ومروي","الإمبراطورية الرومانية","حضارة الإنكا","حضارة المايا"],en:["Kingdom of Kush, Napata, and Meroe","Roman Empire","Inca civilization","Maya civilization"]}, correct:0 },
+  { q:{ar:"الموارد الاقتصادية الطبيعية الرئيسية في السودان تشمل:",en:"The main natural economic resources in Sudan include:"}, options:{ar:["الزراعة، الثروة الحيوانية، والمعادن","صناعة الطائرات الحربية","التعدين الفضائي","إنتاج الرقائق الإلكترونية الدقيقة"],en:["Agriculture, livestock, and minerals","Military aircraft manufacturing","Space mining","Microchip production"]}, correct:0 },
+  { q:{ar:"يتميز المجتمع السوداني بـ:",en:"Sudanese society is characterized by:"}, options:{ar:["التنوع الإثني والثقافي واللغوي الثري","الانغلاق الثقافي التام","وجود عرق وثقافة واحدة فقط","عدم وجود تراث شعبي"],en:["Rich ethnic, cultural, and linguistic diversity","Complete cultural closure","Presence of only one race and culture","Absence of folklore"]}, correct:0 },
+  { q:{ar:"يمثل موقع السودان الجغرافي استراتيجياً:",en:"Sudan's geographical location strategically represents:"}, options:{ar:["حلقة وصل بين العالم العربي وإفريقيا","جزيرة منعزلة في المحيط الهادئ","قطباً شمالياً بارداً","حدوداً تفصل أوروبا عن آسيا"],en:["A bridge between the Arab world and Africa","An isolated island in the Pacific Ocean","A cold North Pole","A border separating Europe and Asia"]}, correct:0 },
+  { q:{ar:"من المعالم الأثرية والتاريخية البارزة في السودان:",en:"Among the prominent archaeological and historical landmarks in Sudan are:"}, options:{ar:["أهرامات البجراوية وجبل البركل","سور الصين العظيم","برج إيفل","تمثال الحرية"],en:["Meroe Pyramids and Jebel Barkal","Great Wall of China","Eiffel Tower","Statue of Liberty"]}, correct:0 },
+  { q:{ar:"الإرث الثقافي والفني في السودان يظهر بوضوح في:",en:"Cultural and artistic heritage in Sudan clearly appears in:"}, options:{ar:["التنوع الموسيقي، الشعر الغنائي، والفنون التشكيلية العريقة","انعدام الفنون والثقافة","غياب الموسيقى الشعبية","الفلكلور المستورد بالكامل"],en:["Musical diversity, lyrical poetry, and ancient fine arts","Absence of arts and culture","Absence of folk music","Fully imported folklore"]}, correct:0 },
+  { q:{ar:"التحديات الكبرى التي تواجه مسيرة التنمية في السودان تشمل:",en:"Major challenges facing the development path in Sudan include:"}, options:{ar:["تحقيق الاستقرار السياسي، الاقتصادي، وتطوير البنى التحتية","غياب الموارد الطبيعية بالكلية","زيادة عدد المحيطات","عدم وجود سكان"],en:["Achieving political and economic stability and infrastructure development","Total absence of natural resources","Increasing oceans","Absence of population"]}, correct:0 },
+  { q:{ar:"نظام الإدارة والتقاليد المحلية في السودان تكاملت تاريخياً مع:",en:"The system of administration and local traditions in Sudan historically integrated with:"}, options:{ar:["نظم الإدارة الأهلية والمحلية المتوارثة","الإدارة الفضائية الرقمية","القوانين البحرية الدولية فقط","الأنظمة الاقتصادية الافتراضية"],en:["Inherited native and local administration systems","Digital space administration","International maritime laws only","Virtual economic systems"]}, correct:0 }
+ ]
+};
+
+
+########################################################################
+FILE: src/data/semesters.js
+########################################################################
+
+// المواد الدراسية لكل سمستر.
+// لإضافة مادة: أضف سطراً جديداً بالشكل  ["اسم المادة", "أيقونة", "اسم المجلد في Supabase"]
+// السطر الثالث (اسم المجلد) هو اسم مجلد المادة داخل bucket الخاص بالتخزين.
+export const SEMESTERS = {
+ "semester3": {
+  name: { ar: "السمستر الثالث (2026-2027)", en: "Semester 3 (2026-2027)" },
+  subjects: [
+   ["Business Communication","📱","BusinessCommunication"],
+   ["Programming Methods II","💻","ProgrammingMethods2"],
+   ["Accounting II","📊","Accounting2"],
+   ["Internet Programming","🌐","InternetProgramming"],
+   ["Principles of Finance","💰","PrinciplesOfFinance"],
+   ["Probability & Statistics","📈","ProbabilityAndStatistics"],
+   ["English Language III","🌎","English3"]
+  ]
+ },
+ "semester2": {
+  name: { ar: "السمستر الثاني", en: "Semester 2" },
+  subjects: [
+   ["Accounting I","📊","Accounting"],
+   ["Arabic Language II","📖","Arabic"],
+   ["Calculus","📐","Calculus"],
+   ["Computer Applications for Business","💻","ComputerApplications"],
+   ["English Language II","🌎","English"],
+   ["Fundamentals of Information Systems","🖥️","Fundamental of information systems"],
+   ["Islamic Studies II","📚","IslamicStudies"],
+   ["Managing People","👥","ManagingPeople"],
+   ["Programming Methods I","💻","Programming"],
+   ["Sudanese Studies","🇸🇩","SudaneseStudies"]
+  ]
+ }
+};
+
+// [المفتاح/المجلد, الأيقونة, الاسم بالإنجليزية, الاسم بالعربية]
+export const MATERIALS = [
+ ["Lectures","📚","Course Lectures","المحاضرات"],
+ ["Exams","📝","Practice Exams","الامتحانات"],
+ ["Questions","❓","Review Questions (MCQ)","أسئلة الاختيار المتعدد (١٠ أسئلة)"]
+];
+
+
+########################################################################
+FILE: src/lib/files.js
+########################################################################
+
+import { supabase, BUCKET } from "@/lib/supabase";
+import { STATIC } from "@/data/files";
+import { ALL_SUBJECTS, folderOf } from "@/lib/subjects";
+
+const cache = new Map();
+
+async function listFiles(path) {
+  const { data, error } = await supabase.storage
+    .from(BUCKET)
+    .list(path, { limit: 200, sortBy: { column: "name", order: "asc" } });
+  if (error) throw error;
+  return (data || [])
+    .filter((f) => f.id && f.name !== ".emptyFolderPlaceholder")
+    .map((f) => ({
+      name: f.name.replace(/\.[^.]+$/, ""),
+      url: supabase.storage.from(BUCKET).getPublicUrl(path + "/" + f.name).data.publicUrl,
+    }));
+}
+
+/** ملفات مادة/قسم: الروابط الثابتة + ملفات التخزين + الملفات المعتمدة من الطلاب */
+export async function loadFiles(subjectName, material) {
+  const key = subjectName + "|" + material;
+  if (cache.has(key)) return cache.get(key);
+
+  const fixed = (STATIC[subjectName] && STATIC[subjectName][material]) || [];
+  let listed = [];
+  let approved = [];
+
+  try {
+    const folder = folderOf(subjectName);
+    listed = await listFiles(folder + "/" + material);
+    if (material === "Lectures") listed = listed.concat(await listFiles(folder));
+  } catch (e) {
+    console.error(e);
+    if (!fixed.length) throw e;
+  }
+  try {
+    const { data, error } = await supabase
+      .from("submissions")
+      .select("name,path")
+      .eq("subject", subjectName)
+      .eq("material", material)
+      .eq("approved", true);
+    if (!error) approved = (data || []).map((r) => ({ name: r.name, url: r.path }));
+  } catch (e) {
+    console.error("Could not load approved submissions:", e);
+  }
+
+  const seen = new Set();
+  const out = [];
+  fixed.concat(listed, approved).forEach((f) => {
+    if (!seen.has(f.url)) {
+      seen.add(f.url);
+      out.push(f);
+    }
+  });
+  cache.set(key, out);
+  return out;
+}
+
+/** رفع ملف من طالب (يظهر بعد موافقة الأدمن) */
+export async function uploadSubmission(subject, material, file) {
+  const safeName = file.name.replace(/[^\w.\-]+/g, "_");
+  const path = "pending/" + Date.now() + "_" + safeName;
+  const { error: upErr } = await supabase.storage.from(BUCKET).upload(path, file);
+  if (upErr) throw upErr;
+  const url = supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+  const { error: insErr } = await supabase.from("submissions").insert([
+    {
+      subject,
+      material,
+      name: file.name.replace(/\.[^.]+$/, "").slice(0, 120),
+      path: url,
+      approved: false,
+    },
+  ]);
+  if (insErr) throw insErr;
+}
+
+/**
+ * فهرس البحث للملفات (محاضرات وامتحانات كل المواد).
+ * يبدأ بالروابط الثابتة فوراً، ثم يكمّل من التخزين بالتوازي المحدود.
+ */
+let indexPromise = null;
+export function buildFileIndex() {
+  if (indexPromise) return indexPromise;
+  indexPromise = (async () => {
+    const jobs = [];
+    for (const s of ALL_SUBJECTS) {
+      for (const material of ["Lectures", "Exams"]) jobs.push({ s, material });
+    }
+    const out = [];
+    let i = 0;
+    async function worker() {
+      while (i < jobs.length) {
+        const { s, material } = jobs[i++];
+        try {
+          const files = await loadFiles(s.name, material);
+          files.forEach((f) =>
+            out.push({ type: "file", name: f.name, url: f.url, subject: s.name, slug: s.slug, icon: s.icon, material })
+          );
+        } catch {
+          /* تجاهل مادة تعذّر تحميلها */
+        }
+      }
+    }
+    await Promise.all([worker(), worker(), worker(), worker(), worker()]);
+    return out;
+  })();
+  return indexPromise;
+}
+
+
+########################################################################
+FILE: src/lib/search.js
+########################################################################
+
+// بحث تلقائي يتحمّل الأخطاء الإملائية، ويدعم العربي والإنجليزي.
+
+const ROMAN = { i: "1", ii: "2", iii: "3", iv: "4" };
+
+/** توحيد النص: حروف صغيرة، حذف التشكيل، توحيد الهمزات والتاء المربوطة والألف المقصورة، وتحويل الأرقام العربية */
+export function norm(input) {
+  return String(input || "")
+    .toLowerCase()
+    .replace(/[\u064B-\u065F\u0670\u0640]/g, "")
+    .replace(/[أإآٱ]/g, "ا")
+    .replace(/ى/g, "ي")
+    .replace(/ة/g, "ه")
+    .replace(/ؤ/g, "و")
+    .replace(/ئ/g, "ي")
+    .replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)))
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export function tokens(input) {
+  return norm(input)
+    .split(" ")
+    .filter(Boolean)
+    .map((t) => ROMAN[t] || t);
+}
+
+/** مسافة التحرير (Levenshtein) مع توقف مبكر */
+function lev(a, b, max) {
+  if (Math.abs(a.length - b.length) > max) return max + 1;
+  const prev = new Array(b.length + 1);
+  for (let j = 0; j <= b.length; j++) prev[j] = j;
+  for (let i = 1; i <= a.length; i++) {
+    let last = prev[0];
+    prev[0] = i;
+    let rowMin = prev[0];
+    for (let j = 1; j <= b.length; j++) {
+      const tmp = prev[j];
+      prev[j] = Math.min(
+        prev[j] + 1,
+        prev[j - 1] + 1,
+        last + (a[i - 1] === b[j - 1] ? 0 : 1)
+      );
+      last = tmp;
+      if (prev[j] < rowMin) rowMin = prev[j];
+    }
+    if (rowMin > max) return max + 1;
+  }
+  return prev[b.length];
+}
+
+function tokenScore(q, t) {
+  if (t === q) return 100;
+  if (t.startsWith(q)) return 90 - Math.min(10, t.length - q.length);
+  if (q.length >= 3 && t.includes(q)) return 70;
+  if (q.length >= 3) {
+    const max = q.length <= 4 ? 1 : q.length <= 8 ? 2 : 3;
+    const d = Math.min(lev(q, t.slice(0, q.length), max), lev(q, t, max));
+    if (d <= max) return 60 - d * 10;
+  }
+  return 0;
+}
+
+/** تقييم عنصر مقابل الاستعلام: 0 = غير مطابق */
+export function scoreText(queryTokens, text) {
+  const tt = tokens(text);
+  if (!tt.length || !queryTokens.length) return 0;
+  let total = 0;
+  for (const q of queryTokens) {
+    let best = 0;
+    for (const t of tt) {
+      const s = tokenScore(q, t);
+      if (s > best) best = s;
+    }
+    if (!best) {
+      // الطالب كتب الكلمات ملتصقة؟ جرّب مطابقتها مع النص كاملاً بلا مسافات
+      const joined = tt.join("");
+      if (q.length >= 4 && joined.includes(q)) best = 55;
+    }
+    if (!best) return 0;
+    total += best;
+  }
+  return total / queryTokens.length;
+}
+
+/**
+ * items: مصفوفة عناصر، getTexts(item) => مصفوفة نصوص قابلة للبحث
+ * يرجع أفضل النتائج مرتبة.
+ */
+export function fuzzySearch(items, query, getTexts, limit = 8) {
+  const q = tokens(query);
+  if (!q.length) return [];
+  const scored = [];
+  for (const item of items) {
+    let best = 0;
+    for (const text of getTexts(item)) {
+      const s = scoreText(q, text);
+      if (s > best) best = s;
+    }
+    if (best > 0) scored.push({ item, score: best });
+  }
+  scored.sort((a, b) => b.score - a.score);
+  return scored.slice(0, limit).map((x) => x.item);
+}
+
+
+########################################################################
+FILE: src/lib/subjects.js
+########################################################################
+
+import { SEMESTERS } from "@/data/semesters";
+import { SUBJECT_ALIASES } from "@/data/aliases";
+
+export const slugify = (name) =>
+  String(name)
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+// قائمة موحّدة بكل المواد من كل السمسترات
+export const ALL_SUBJECTS = Object.entries(SEMESTERS).flatMap(([semKey, sem]) =>
+  sem.subjects.map(([name, icon, folder]) => ({
+    name,
+    icon,
+    folder,
+    slug: slugify(name),
+    semester: semKey,
+    aliases: SUBJECT_ALIASES[name] || [],
+  }))
+);
+
+export const findSubject = (slug) => ALL_SUBJECTS.find((s) => s.slug === slug) || null;
+export const folderOf = (name) => (ALL_SUBJECTS.find((s) => s.name === name) || {}).folder || name;
+
+export const MATERIAL_KEYS = ["Lectures", "Exams", "Questions"];
+
+
+########################################################################
+FILE: src/lib/supabase.js
+########################################################################
+
+import { createClient } from "@supabase/supabase-js";
+
+// المفتاح هنا هو المفتاح العام (publishable) ومصمم ليظهر في المتصفح.
+// الحماية الحقيقية تأتي من سياسات RLS في ملف supabase/schema.sql.
+export const SUPABASE_URL =
+  process.env.NEXT_PUBLIC_SUPABASE_URL || "https://jetxkhyvcxuxvheastlr.supabase.co";
+export const SUPABASE_KEY =
+  process.env.NEXT_PUBLIC_SUPABASE_KEY || "sb_publishable_ubU3voY3OYZr10bVmyB6HA_07Djetpw";
+export const BUCKET = process.env.NEXT_PUBLIC_STORAGE_BUCKET || "Twix";
+
+export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+
+########################################################################
+FILE: supabase/schema.sql
+########################################################################
+
+-- =====================================================================
+--  Students IS Platform — إعداد الطلاب والأدمن في Supabase
+--  شغّل هذا الملف كاملاً مرة واحدة: Supabase > SQL Editor > New query > Run
+--  ⚠️ شغّله قبل نشر النسخة الجديدة، وقبل أن يسجّل أي طالب.
+-- =====================================================================
+
+-- ---------------------------------------------------------------------
+-- 1) جدول الملفات الشخصية (الاسم + الدور: student / admin)
+-- ---------------------------------------------------------------------
+create table if not exists public.profiles (
+  id         uuid primary key references auth.users(id) on delete cascade,
+  full_name  text,
+  email      text,
+  role       text not null default 'student' check (role in ('student', 'admin')),
+  created_at timestamptz not null default now()
+);
+
+alter table public.profiles enable row level security;
+
+-- دالة التحقق من الأدمن (security definer كي لا تحصل حلقة في سياسات RLS)
+create or replace function public.is_admin()
+returns boolean
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select exists (
+    select 1 from public.profiles where id = auth.uid() and role = 'admin'
+  );
+$$;
+
+-- الطالب يرى ملفه فقط، والأدمن يرى الجميع (للبحث عن الطلاب)
+drop policy if exists "profiles_select_own_or_admin" on public.profiles;
+create policy "profiles_select_own_or_admin" on public.profiles
+  for select to authenticated
+  using (id = auth.uid() or public.is_admin());
+
+-- الأدمن فقط يعدّل الملفات الشخصية (مثلاً لمنح صلاحية أدمن). الطالب لا يستطيع تعديل دوره.
+drop policy if exists "profiles_update_admin" on public.profiles;
+create policy "profiles_update_admin" on public.profiles
+  for update to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());
+
+-- إنشاء ملف شخصي تلقائياً عند تسجيل أي طالب جديد
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.profiles (id, email, full_name)
+  values (new.id, new.email, coalesce(new.raw_user_meta_data ->> 'full_name', ''))
+  on conflict (id) do nothing;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function public.handle_new_user();
+
+-- إنشاء ملفات شخصية للحسابات الموجودة مسبقاً (ومنها حساب الأدمن الحالي)
+insert into public.profiles (id, email, full_name)
+select id, email, coalesce(raw_user_meta_data ->> 'full_name', '')
+from auth.users
+on conflict (id) do nothing;
+
+-- ---------------------------------------------------------------------
+-- 2) 👑 اجعل حساب الأدمن الحالي أدمن  (غيّر البريد قبل التشغيل!)
+-- ---------------------------------------------------------------------
+update public.profiles
+set role = 'admin'
+where email = 'ADMIN_EMAIL_HERE';
+
+-- ---------------------------------------------------------------------
+-- 3) جدول الملفات المرفوعة (submissions): من يقرأ ومن يعدّل
+-- ---------------------------------------------------------------------
+alter table public.submissions enable row level security;
+alter table public.submissions add column if not exists user_id uuid default auth.uid();
+
+-- أي شخص يرى الملفات المعتمدة فقط
+drop policy if exists "submissions_read_approved" on public.submissions;
+create policy "submissions_read_approved" on public.submissions
+  for select to anon, authenticated
+  using (approved = true);
+
+-- الطالب المسجّل يرفع ملفاً بحالة "غير معتمد" فقط
+drop policy if exists "submissions_insert_pending" on public.submissions;
+create policy "submissions_insert_pending" on public.submissions
+  for insert to authenticated
+  with check (approved = false);
+
+-- الأدمن فقط: يرى كل شيء، يوافق، يحذف
+drop policy if exists "submissions_admin_all" on public.submissions;
+create policy "submissions_admin_all" on public.submissions
+  for all to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());
+
+-- ---------------------------------------------------------------------
+-- 4) التخزين (Storage): الطالب يرفع إلى مجلد pending فقط، والأدمن فقط يحذف
+--    غيّر 'Twix' إذا كان اسم الـ bucket مختلفاً.
+-- ---------------------------------------------------------------------
+drop policy if exists "twix_upload_pending" on storage.objects;
+create policy "twix_upload_pending" on storage.objects
+  for insert to authenticated
+  with check (bucket_id = 'Twix' and (storage.foldername(name))[1] = 'pending');
+
+drop policy if exists "twix_admin_delete" on storage.objects;
+create policy "twix_admin_delete" on storage.objects
+  for delete to authenticated
+  using (bucket_id = 'Twix' and public.is_admin());
+
+-- ---------------------------------------------------------------------
+-- 5) ⚠️ مراجعة مهمة بعد التشغيل
+-- الصفحة القديمة كانت تعتبر أي مستخدم مسجّل دخول أدمن. إذا كانت عندك سياسات قديمة
+-- على submissions أو storage.objects تسمح لـ "authenticated" بالتعديل أو الحذف،
+-- فسيستطيع أي طالب مسجّل استخدامها! شغّل هذا الاستعلام لرؤية كل السياسات:
+--
+--   select schemaname, tablename, policyname, cmd, roles, qual
+--   from pg_policies
+--   where tablename in ('submissions', 'objects', 'profiles')
+--   order by tablename, policyname;
+--
+-- واحذف أي سياسة قديمة (غير التي أنشأها هذا الملف) تسمح لـ authenticated
+-- بـ update أو delete على submissions، أو delete على storage.objects:
+--   drop policy "اسم_السياسة_القديمة" on public.submissions;
+-- ---------------------------------------------------------------------
