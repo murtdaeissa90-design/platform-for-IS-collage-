@@ -5,7 +5,7 @@ Al-Bayan University · College of Computer Science & IT · Information Systems D
 
 An educational platform for organizing university subjects, lectures, sheets, exams and review questions, with student accounts and an admin panel.
 
-## Tech stack
+## Tech stack 
 
 | Part | Technology |
 |---|---|
