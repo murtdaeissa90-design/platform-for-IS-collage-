@@ -1,0 +1,34 @@
+# 🔒 Security & Permissions
+
+## Roles
+| | Visitor | Student | Admin |
+|---|:-:|:-:|:-:|
+| Open platform pages | ✗ | ✓ | ✓ |
+| Upload a file (pending approval) | ✗ | ✓ | ✓ |
+| See unapproved files | ✗ | ✗ | ✓ |
+| Approve and delete | ✗ | ✗ | ✓ |
+| See students and search them | ✗ | ✗ | ✓ |
+
+## How protection is enforced
+Real protection lives in Supabase (RLS policies), not in the browser. `supabase/schema.sql` creates:
+- A `profiles` table (name, email, role), set to `student` automatically on sign-up
+- An `is_admin()` function to check for admins
+- Policies that stop students from approving, deleting, or seeing other users' data
+
+## ⚠️ After running schema.sql
+Review old policies, because a single permissive one is enough to leave the door open:
+`select tablename, policyname, cmd, roles from pg_policies where tablename in ('submissions','objects','profiles');`
+Drop any old policy that lets any signed-in user update or delete:
+`drop policy "policy_name" on public.submissions;`
+
+## Keys
+- The publishable key is meant to be visible in the browser and is safe to keep in code
+- The `service_role` key is secret: never put it in code or on GitHub
+
+## Storage files
+The bucket is public: anyone with a file link can open it. Do not store confidential material in it.
+
+## Sign-up
+- Confirm email is currently off (anyone can register with an email they don't own)
+- To pause sign-ups: turn off Allow new users to sign up in Supabase
+- Make an admin: `update public.profiles set role = 'admin' where email = '...';`
