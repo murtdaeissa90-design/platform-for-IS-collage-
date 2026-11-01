@@ -1,0 +1,19 @@
+## Features
+**Core**
+- Lectures, exams and MCQ questions for every subject
+- Study tasks, favorites and exam countdowns
+- Arabic/English and dark mode
+
+**New (version 1.0)**
+- Student accounts: sign up, sign in, password reset
+- One shared login interface for students and admins
+- Smart search that tolerates spelling mistakes across subjects and files
+- Admin panel: review files, approve, permanently delete, and search students
+- Roles and permissions enforced in the database
+- Edit content from GitHub with automatic deployment
+
+**Coming next**
+- Admin announcements on the home page
+- Saved MCQ results per student
+- Custom SMTP for password reset
+- A "Doctor" role to manage a specific subject
