@@ -1,100 +1,52 @@
-# 🎓 Students IS Education Platform
-🔗https://computer-is-collage.netlify.app
-Al-Bayan University · College of Computer Science & IT · Information Systems Department
-🌐 https://computer-is-collage.netlify.app
+# 🎓 منصة Students IS التعليمية
 
-An educational platform for organizing university subjects, lectures, sheets, exams and review questions, with student accounts and an admin panel.
+منصة تعليمية لتنظيم المواد الجامعية والمحاضرات والشيتات والامتحانات وأسئلة المراجعة.
+**جامعة البيان · كلية علوم الحاسوب وتقانة المعلومات · قسم نظم المعلومات**
 
-## Tech stack 
+🌐 الموقع: https://computer-is-collage.netlify.app
 
-| Part | Technology |
+## المميزات
+
+- حسابات للطلاب (إنشاء حساب، دخول، استعادة كلمة المرور) عبر Supabase Auth
+- لوحة أدمن محمية: مراجعة الملفات المرفوعة، الموافقة، الحذف، والبحث عن الطلاب
+- بحث تلقائي يتحمل الأخطاء الإملائية (عربي وإنجليزي) في المواد والمحاضرات والشيتات والامتحانات
+- رفع الطلاب للملفات (تظهر بعد موافقة الأدمن)
+- أسئلة اختيار من متعدد ثنائية اللغة
+- مهام المذاكرة، المفضلة، والعد التنازلي للامتحانات (محفوظة في متصفح الطالب)
+- واجهة عربية/إنجليزية (RTL/LTR) ووضع ليلي
+
+## التقنيات
+
+| الجزء | التقنية |
 |---|---|
-| Frontend | Next.js 14 (App Router) + React 18, static export |
-| Language | JavaScript (JSX) |
-| Accounts, database, storage | Supabase (Auth + Postgres + Storage) |
-| Hosting & deployment | Netlify (auto-deploys from GitHub) |
+| الواجهة | Next.js 14 (App Router) + React 18، تصدير ثابت `output: "export"` |
+| الحسابات والبيانات والتخزين | Supabase (Auth + Postgres + Storage) |
+| الاستضافة والنشر | Netlify (ينشر تلقائياً من GitHub) |
 
-## What is Next.js?
+## الخطوط
 
-Next.js is a framework built on top of React for building modern websites. It adds what plain React lacks:
+- English: **Inter** (الأساسي) · **Sora** (العناوين) · **JetBrains Mono** (الأكواد والأرقام)
+- العربي: **Amiri Bold** (العناوين) · **IBM Plex Sans Arabic Regular** (النص) · **Cairo SemiBold** (الواجهة)
 
-- **File-based routing:** every folder under `src/app` becomes a page, e.g. `/subject/calculus/Lectures/`.
-- **Static export:** the site is built once into plain files (`out/`) that load fast and run on Netlify without a server.
-- **Layouts:** shared parts such as the header, navigation and fonts are written once and reused on every page.
-- **Font optimization:** `next/font` loads Inter, Sora, Amiri, Cairo and the others efficiently, without flicker.
-- **Easy growth:** new pages, API routes or server features can be added later without a rewrite.
+## ابدأ من هنا
 
-In this project, all data operations (login, storage, database) go through Supabase from the browser, so no custom server is needed yet.
+| أريد أن... | اقرأ |
+|---|---|
+| أجهّز المشروع لأول مرة (Supabase + Netlify) | [docs/SETUP.md](docs/SETUP.md) |
+| أضيف مادة أو رابط أو أسئلة | [docs/EDITING.md](docs/EDITING.md) |
+| أفهم أين يوجد كل ملف | [docs/STRUCTURE.md](docs/STRUCTURE.md) |
+| أفهم الصلاحيات والحماية | [docs/SECURITY.md](docs/SECURITY.md) |
+| أحل مشكلة ظهرت | [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) |
+| أعرف ما تغيّر | [CHANGELOG.md](CHANGELOG.md) |
 
-## What is TypeScript?
-
-TypeScript is JavaScript with types. You declare what kind of data each variable, function or object holds, and the editor catches mistakes before the site runs.
-
-```ts
-// TypeScript example
-function approve(id: number, approved: boolean): void { /* ... */ }
-approve("5", true); // ❌ error: "5" is a string, not a number
-```
-
-**Benefits:** fewer bugs, better autocomplete, safer refactoring, and self-documenting code.
-**Trade-off:** slightly more code, and a build error if types do not match.
-
-**Status in this project:** not used. The code is plain JavaScript, which keeps editing from GitHub simple. Migrating later is straightforward: rename `.js` files to `.ts` / `.tsx` and add a `tsconfig.json`. Next.js supports it out of the box. It becomes worthwhile when more developers join or the platform grows (grades, roles, announcements).
-
-## Features
-
-**Core**
-- Lectures, exams and MCQ questions for every subject
-- Study tasks, favorites and exam countdowns
-- Arabic/English (RTL/LTR) and dark mode
-
-**New (version 1.0)**
-- Student accounts: sign up, sign in, password reset
-- One shared login interface for students and admins
-- Smart search that tolerates spelling mistakes across subjects and files
-- Admin panel: review files, approve, permanently delete, and search students
-- Roles and permissions enforced in the database
-- Edit content from GitHub with automatic deployment
-
-**Coming next**
-- Admin announcements on the home page
-- Saved MCQ results per student
-- Custom SMTP for password reset
-- A "Doctor" role to manage a specific subject
-
-## Fonts
-
-- **English:** Inter (main) · Sora (headings) · JetBrains Mono (code and numbers)
-- **Arabic:** Amiri Bold (headings) · IBM Plex Sans Arabic Regular (body) · Cairo SemiBold (UI)
-
-## Setup (one time)
-
-1. Supabase → SQL Editor: run `supabase/schema.sql` (after replacing `ADMIN_EMAIL_HERE` with the admin's email).
-2. Authentication → Sign In / Providers: enable Email and "Allow new users to sign up", and turn off "Confirm email".
-3. Netlify: Build command `npm run build` · Publish directory `out`.
-
-## Editing content from GitHub (deploys automatically)
-
-- `src/data/semesters.js` → add a subject
-- `src/data/files.js` → file links
-- `src/data/questions.js` → MCQ questions
-- Subject files: upload to Supabase Storage inside `folder/Lectures` or `folder/Exams`
-
-## New admin
-
-`update public.profiles set role = 'admin' where email = 'name@gmail.com';`
-
-## Troubleshooting
-
-Add `?debug=1` to a page URL to see the technical cause of an error (for developers only).
-
-## Run locally
+## التشغيل محلياً
 
 ```bash
 npm install
-npm run dev
+npm run dev      # http://localhost:3000
+npm run build    # ينتج مجلد out
 ```
 
-## Developers
+## المطورون
 
-Murtda Eissa · Abdullah Ismail — © 2026 All Rights Reserved
+مرتضى عيسى · عبدالله إسماعيل — © 2026 جميع الحقوق محفوظة
