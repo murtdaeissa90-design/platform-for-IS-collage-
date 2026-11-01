@@ -1,0 +1,113 @@
+/* ⚠️ للتوضيح فقط — هذه الأنماط الفعلية موجودة في src/app/globals.css */
+/* لا تستورد هذا الملف في المشروع. */
+
+/* Containers */
+.container{max-width:1150px;margin:auto;padding:35px 20px;}
+
+.title{text-align:center;margin-bottom:12px;}
+
+.title h2{color:var(--accent);font-size:28px;font-weight:700;margin-bottom:10px;}
+
+.title h2::after{
+    content:"";
+    display:block;
+    width:60px;
+    height:4px;
+    margin:12px auto 0;
+    border-radius:4px;
+    background:linear-gradient(90deg,var(--navy),var(--teal));
+}
+
+.counter{text-align:center;margin:14px 0 22px;color:var(--muted);font-size:15px;font-weight:500;}
+
+/* Semester tabs */
+.semester-tabs{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    flex-wrap:wrap;
+    width:fit-content;
+    max-width:100%;
+    margin:0 auto 26px;
+    padding:6px;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:50px;
+    box-shadow:var(--shadow);
+}
+
+.sem-btn{
+    background:none;
+    border:0;
+    color:var(--accent);
+    font-family:inherit;
+    font-size:15px;
+    font-weight:600;
+    padding:11px 26px;
+    border-radius:40px;
+    cursor:pointer;
+    transition:background .25s,color .25s,box-shadow .25s;
+}
+
+.sem-btn:hover:not(.active){background:rgba(23,59,103,.08);}
+
+.sem-btn.active{
+    background:linear-gradient(135deg,var(--navy),var(--teal));
+    color:#fff;
+    box-shadow:0 4px 12px rgba(23,59,103,.28);
+}
+
+/* Subjects */
+.subjects{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:24px;}
+
+.subject{
+    position:relative;
+    overflow:hidden;
+    background:var(--card);
+    padding:30px 20px 26px;
+    border-radius:20px;
+    border:1px solid var(--line);
+    text-align:center;
+    box-shadow:var(--shadow);
+    cursor:pointer;
+    transition:transform .3s,box-shadow .3s,border-color .3s;
+}
+
+.subject::before{
+    content:"";
+    position:absolute;
+    top:0;left:0;right:0;
+    height:5px;
+    background:linear-gradient(90deg,var(--navy),var(--teal));
+    opacity:.85;
+}
+
+.subject:hover{transform:translateY(-6px);box-shadow:var(--shadow-hover);border-color:var(--accent);}
+
+.icon,.material-icon{
+    width:78px;height:78px;
+    margin:0 auto 16px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:38px;
+    border-radius:22px;
+    background:linear-gradient(135deg,rgba(23,59,103,.10),rgba(22,128,106,.12));
+}
+
+.subject h3{color:var(--accent);font-size:17px;font-weight:600;margin-bottom:10px;}
+
+.fav-star{
+    position:absolute;
+    top:14px;
+    inset-inline-end:14px;
+    font-size:20px;
+    cursor:pointer;
+    opacity:.4;
+    z-index:2;
+    transition:opacity .2s,transform .2s;
+}
+
+.fav-star:hover{transform:scale(1.2);}
+
+.fav-star.active{opacity:1;}
+
+a.subject,a.material{display:block;text-decoration:none;color:inherit;}
