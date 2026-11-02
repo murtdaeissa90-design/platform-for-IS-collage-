@@ -31,7 +31,7 @@ export const SEMESTERS = {
  }
 };
 "semester 4":{
-name :{ en :Semester 4},
+name :{ en :"Semester 4"},
 
 
 ]
