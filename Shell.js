@@ -69,7 +69,7 @@ export default function Shell({ children }) {
           🎓 Students IS Education Platform
         </p>
         <p className="contact">
-          👤 Murtda eissa | 📞 0998359296 | ✉️ Murtdaeissa90@gmail.com
+          👤 Murtda eissa |  📧Murtdaeissa90@gmail.com
         </p>
         <div className="credits">
           <span className="label">{L("Developed by", "تطوير وإعداد")}</span>
