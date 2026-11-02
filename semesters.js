@@ -30,7 +30,13 @@ export const SEMESTERS = {
   ]
  }
 };
+"semester 4":{
+name :{ en :Semester 4},
 
+
+]
+}
+};
 // [المفتاح/المجلد, الأيقونة, الاسم بالإنجليزية, الاسم بالعربية]
 export const MATERIALS = [
  ["Lectures","📚","Course Lectures","المحاضرات"],
