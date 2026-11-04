@@ -14,7 +14,7 @@ const plex = IBM_Plex_Sans_Arabic({ subsets: ["arabic", "latin"], weight: ["400"
 const cairo = Cairo({ subsets: ["arabic", "latin"], variable: "--f-cairo", display: "swap" }); // خط متغيّر: نستخدم الوزن 600 (SemiBold) من CSS
 
 export const metadata = {
-  title: "Students IS Education Platform",
+  title: "Students IS Educations Platform",
   description: "منصة تعليمية لتنظيم المواد الجامعية والشيتات والمحاضرات والامتحانات - جامعة البيان، قسم نظم المعلومات",
 };
 
