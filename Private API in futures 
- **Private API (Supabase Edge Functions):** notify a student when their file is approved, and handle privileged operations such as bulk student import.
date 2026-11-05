@@ -1,0 +1,2 @@
+### 🔮 Roadmap
+- **Private API (Supabase Edge Functions):** notify a student when their file is approved, and handle privileged operations such as bulk student import.
